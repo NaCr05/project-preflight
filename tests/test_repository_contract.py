@@ -21,6 +21,18 @@ class RepositoryContractTests(unittest.TestCase):
         chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
         self.assertIn("[简体中文](README.zh-CN.md)", english)
         self.assertIn("[English](README.md)", chinese)
+        self.assertIn("(docs/workflow.md)", english)
+        self.assertIn("(docs/workflow.zh-CN.md)", chinese)
+
+    def test_workflow_guides_are_reciprocal_and_have_mermaid_maps(self):
+        english = (REPO_ROOT / "docs" / "workflow.md").read_text(encoding="utf-8")
+        chinese = (REPO_ROOT / "docs" / "workflow.zh-CN.md").read_text(encoding="utf-8")
+        self.assertIn("[简体中文](workflow.zh-CN.md)", english)
+        self.assertIn("[English](workflow.md)", chinese)
+        self.assertIn("```mermaid", english)
+        self.assertIn("```mermaid", chinese)
+        self.assertIn("READY_FOR_IMPLEMENTATION", english)
+        self.assertIn("READY_FOR_IMPLEMENTATION", chinese)
 
     def test_distributable_skill_has_no_obsolete_to_prd_name(self):
         matches = []
