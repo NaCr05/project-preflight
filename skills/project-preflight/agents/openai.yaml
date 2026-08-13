@@ -1,0 +1,4 @@
+interface:
+  display_name: "Project Preflight"
+  short_description: "Turn project ideas into implementation-ready work"
+  default_prompt: "Use $project-preflight to assess this project, resume its planning state, and guide it to implementation readiness."

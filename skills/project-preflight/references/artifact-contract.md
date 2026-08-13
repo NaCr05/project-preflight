@@ -1,0 +1,123 @@
+# Artifact and State Contract
+
+## Contents
+
+1. [Canonical state](#canonical-state)
+2. [Frontmatter schema](#frontmatter-schema)
+3. [Artifact pointers](#artifact-pointers)
+4. [Stage invariants](#stage-invariants)
+5. [Human-readable evidence](#human-readable-evidence)
+6. [Write and recovery rules](#write-and-recovery-rules)
+
+## Canonical state
+
+Use exactly one project-scoped state file:
+
+```text
+.project/preflight.md
+```
+
+Create it from `assets/preflight-template.md`. YAML frontmatter is canonical for finite state; the Markdown body is canonical for explanations, evidence summaries, blockers, and the next action. Do not maintain a parallel status file.
+
+## Frontmatter schema
+
+Use this restricted YAML subset: top-level scalar fields plus two-space-indented scalar maps. Do not use arrays, aliases, tags, or multiline YAML values.
+
+```yaml
+---
+schema_version: 1
+project: "example-project"
+current_stage: "DISCOVERY"
+previous_stage: "IDEA"
+last_transition: "2026-08-13T08:00:00Z"
+transition_reason: "Captured the original idea"
+tracker: "local-markdown"
+ready_for_implementation: false
+gates:
+  gate_1: "not_evaluated"
+  gate_2: "not_evaluated"
+  gate_3: "not_evaluated"
+  gate_4: "not_evaluated"
+artifacts:
+  idea: "inline:#original-idea"
+  decision_map: null
+  spec: null
+  tickets: null
+dependencies:
+  grill-me: "available"
+  wayfinder: "not_checked"
+  to-spec: "not_checked"
+  to-tickets: "not_checked"
+---
+```
+
+Allowed stages are `IDEA`, `DISCOVERY`, `DECISION`, `SPECIFICATION`, `TICKETING`, and `READY_FOR_IMPLEMENTATION`.
+
+## Artifact pointers
+
+Each artifact value is one of:
+
+- `null` when not produced yet;
+- a repository-relative file or directory path, optionally followed by a Markdown anchor;
+- an `http://` or `https://` tracker URL;
+- `inline:#section-anchor` when the state file itself contains the artifact;
+- `not-required` only for `decision_map`, with an explanation in Gate 2 evidence.
+
+Do not place artifact content in frontmatter. Do not use absolute local paths because another contributor or CI run cannot resolve them.
+
+Local pointers required for the current stage must exist. A URL proves location, not semantic sufficiency; the gate still requires accessible evidence.
+
+## Stage invariants
+
+The current stage must match the first gate that has not passed:
+
+| Current stage | Required passed gates | Required artifact pointers |
+|---|---|---|
+| `IDEA` | None | None |
+| `DISCOVERY` | None | `idea` |
+| `DECISION` | Gate 1 | `idea` |
+| `SPECIFICATION` | Gates 1–2 | `idea`, `decision_map` |
+| `TICKETING` | Gates 1–3 | `idea`, `decision_map`, `spec` |
+| `READY_FOR_IMPLEMENTATION` | Gates 1–4 | All four |
+
+At non-ready stages, the gate owned by that stage must not already be `passed`. Later gates must not be passed either. `ready_for_implementation` is true if and only if the current stage is `READY_FOR_IMPLEMENTATION`.
+
+`previous_stage` may be null only for reconstructed or initial state. Otherwise it must form an allowed transition with `current_stage`, and `transition_reason` must explain the change.
+
+## Human-readable evidence
+
+Keep these headings:
+
+```markdown
+# Project Preflight
+
+## Original Idea
+
+## Gate Evidence
+
+### Gate 1
+### Gate 2
+### Gate 3
+### Gate 4
+
+## Blockers
+
+## Next Action
+```
+
+For a passed gate, its section must contain durable evidence or pointers and must not say only `Not evaluated.` For blocked or invalidated gates, record the reason and the evidence needed to continue.
+
+The Original Idea section may be the canonical idea through `inline:#original-idea`. Keep it concise and preserve the user's intent; later refinement belongs in upstream artifacts.
+
+## Write and recovery rules
+
+1. Read and validate the current file.
+2. Gather new evidence.
+3. Compute the complete next state.
+4. Write frontmatter and body in one change.
+5. Run `scripts/validate_preflight.py`.
+6. If validation fails, repair the state before any further routing.
+
+Never delete historical upstream artifacts during regression. Change their authority by invalidating the relevant gate and updating pointers only when a replacement becomes canonical.
+
+If state and repository evidence disagree, treat repository or tracker canonical artifacts as evidence, but do not silently rewrite state. Report the discrepancy and make the synchronization explicit.
