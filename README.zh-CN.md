@@ -6,9 +6,20 @@
 
 `project-preflight` 将一个模糊的软件想法或尚未完成规划的项目，推进为一份有证据支撑的实施交接。它会识别项目当前所处阶段，将工作路由到兼容的规划 Skill，跨会话保存进度，并在项目被证明已经准备就绪之前阻止生产代码开发。
 
-```text
-想法 → 需求探索 → 决策 → 规格 → Tickets → 准备实施
+## 工作流程
+
+```mermaid
+flowchart LR
+    A["模糊想法"] --> B["需求探索<br/>grill-me"]
+    B -->|"Gate 1"| C["关键决策<br/>wayfinder"]
+    C -->|"Gate 2"| D["正式规格<br/>to-spec"]
+    D -->|"Gate 3"| E["执行任务<br/>to-tickets"]
+    E -->|"Gate 4"| F["READY_FOR_IMPLEMENTATION"]
 ```
+
+Project Preflight 每次只推进一个有证据支持的 Gate。你仍然负责产品和架构判断；Codex 负责采访、绘制决策地图、综合已批准的 Spec，并提出可审查的 Ticket Frontier。终点是可靠的实施交接，而不是已经写完的产品代码。
+
+**[查看完整中文流程指南 →](docs/workflow.zh-CN.md)**
 
 ## 为什么需要它
 
@@ -81,6 +92,7 @@ Skill 会在目标项目中维护一个唯一的规范状态文件：
 
 - `skills/project-preflight/` —— 可分发的 Skill。
 - `docs/product-spec.md` —— v0.1 产品范围和成功标准。
+- `docs/workflow.zh-CN.md` —— 完整用户旅程、Gate、产物、暂停点和回退规则。
 - `docs/decisions/` —— 仅追加演进的架构决策记录。
 - `tests/` —— 确定性的状态契约测试。
 - `evals/` —— 真实行为案例和带日期的前向评测证据。

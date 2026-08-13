@@ -6,9 +6,20 @@
 
 `project-preflight` turns a vague software idea—or a partially planned project—into an evidence-backed implementation handoff. It detects the current stage, routes work through compatible planning Skills, persists progress across sessions, and stops production coding until the project is demonstrably ready.
 
-```text
-Idea → Discovery → Decisions → Specification → Tickets → Ready to Build
+## How it works
+
+```mermaid
+flowchart LR
+    A["Vague idea"] --> B["Discovery<br/>grill-me"]
+    B -->|"Gate 1"| C["Decisions<br/>wayfinder"]
+    C -->|"Gate 2"| D["Specification<br/>to-spec"]
+    D -->|"Gate 3"| E["Tickets<br/>to-tickets"]
+    E -->|"Gate 4"| F["READY_FOR_IMPLEMENTATION"]
 ```
+
+Project Preflight advances one evidence-backed gate at a time. You remain responsible for product and architecture decisions; Codex interviews, maps decisions, synthesizes the approved spec, and proposes a reviewable ticket frontier. The endpoint is an implementation handoff—not completed product code.
+
+**[Read the complete workflow guide →](docs/workflow.md)**
 
 ## Why this exists
 
@@ -81,6 +92,7 @@ Only Gate 4 produces `READY_FOR_IMPLEMENTATION`.
 
 - `skills/project-preflight/` — the distributable Skill.
 - `docs/product-spec.md` — v0.1 product scope and success criteria.
+- `docs/workflow.md` — complete user journey, gates, artifacts, pauses, and rollback behavior.
 - `docs/decisions/` — append-only architectural rationale.
 - `tests/` — deterministic state-contract tests.
 - `evals/` — realistic behavioral cases and dated forward-test evidence.
