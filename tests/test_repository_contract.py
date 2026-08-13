@@ -16,6 +16,12 @@ SPEC.loader.exec_module(VALIDATOR)
 
 
 class RepositoryContractTests(unittest.TestCase):
+    def test_readme_language_switches_are_reciprocal(self):
+        english = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+        self.assertIn("[简体中文](README.zh-CN.md)", english)
+        self.assertIn("[English](README.md)", chinese)
+
     def test_distributable_skill_has_no_obsolete_to_prd_name(self):
         matches = []
         for path in SKILL_ROOT.rglob("*"):

@@ -1,5 +1,7 @@
 # Project Preflight
 
+**English** | [简体中文](README.zh-CN.md)
+
 > A gated pre-coding workflow orchestrator for AI coding agents.
 
 `project-preflight` turns a vague software idea—or a partially planned project—into an evidence-backed implementation handoff. It detects the current stage, routes work through compatible planning Skills, persists progress across sessions, and stops production coding until the project is demonstrably ready.
