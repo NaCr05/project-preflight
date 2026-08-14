@@ -49,6 +49,61 @@ class EvalResult:
         return payload
 
 
+@dataclass(frozen=True)
+class BudgetCheck:
+    profile: str
+    passed: bool
+    observed: Mapping[str, int]
+    ceilings: Mapping[str, int]
+    violations: tuple[str, ...]
+
+
+class EvalBudgetRegistry:
+    """Executable cost and latency policy for comparable behavior runs."""
+
+    def __init__(self, path: Path | str = Path(__file__).with_name("budgets.json")) -> None:
+        self.path = Path(path).resolve()
+        self.data = json.loads(self.path.read_text(encoding="utf-8"))
+        if self.data.get("schema_version") != 1:
+            raise ValueError("unsupported eval-budget schema")
+        profiles = self.data.get("profiles")
+        if not isinstance(profiles, dict) or not profiles:
+            raise ValueError("eval-budget registry must define at least one profile")
+        self.profiles = profiles
+
+    def check(self, profile: str, *, total_tokens: int, latency_ms: int) -> BudgetCheck:
+        try:
+            record = self.profiles[profile]
+        except KeyError as exc:
+            raise ValueError(f"unknown eval-budget profile: {profile}") from exc
+        if total_tokens < 0 or latency_ms < 0:
+            raise ValueError("observed eval metrics cannot be negative")
+        ceilings = record.get("regression_ceiling")
+        if not isinstance(ceilings, dict):
+            raise ValueError(f"eval-budget profile {profile} has no regression ceiling")
+        expected_keys = {"total_tokens", "latency_ms"}
+        if set(ceilings) != expected_keys or any(
+            not isinstance(ceilings[key], int) or ceilings[key] <= 0 for key in expected_keys
+        ):
+            raise ValueError(
+                f"eval-budget profile {profile} must define positive integer ceilings for "
+                "total_tokens and latency_ms"
+            )
+        observed = {"total_tokens": total_tokens, "latency_ms": latency_ms}
+        violations = tuple(
+            f"{metric} observed {observed[metric]} exceeds ceiling {ceilings[metric]}"
+            for metric in ("total_tokens", "latency_ms")
+            if observed[metric] > ceilings[metric]
+        )
+        return BudgetCheck(
+            profile=profile,
+            passed=not violations,
+            observed=observed,
+            ceilings={key: ceilings[key] for key in ("total_tokens", "latency_ms")},
+            violations=violations,
+        )
+
+
 class BehaviorEvalHarness:
     """Deep eval module: manifest, fixtures, scoring, metadata, and evidence output."""
 
@@ -124,6 +179,7 @@ class BehaviorEvalHarness:
         dependency_versions: Mapping[str, str] | None = None,
         latency_ms: int | None = None,
         cost_usd: float | None = None,
+        total_tokens: int | None = None,
     ) -> EvalResult:
         prepared = Path(prepared_directory).resolve()
         case_record = json.loads((prepared / "case.json").read_text(encoding="utf-8"))
@@ -185,7 +241,8 @@ class BehaviorEvalHarness:
             directive_ok = bool(
                 observed_directive.display_skill
                 and observed_directive.display_skill in observed_directive.announcement
-                and "正在使用" in observed_directive.announcement
+                and "Project Preflight" in observed_directive.announcement
+                and observed_directive.stage.title() in observed_directive.announcement
             )
 
         checks = {
@@ -242,6 +299,7 @@ class BehaviorEvalHarness:
             "active_skills": case.get("active_skills", []),
             "latency_ms": latency_ms,
             "cost_usd": cost_usd,
+            "total_tokens": total_tokens,
             "python": platform.python_version(),
             "platform": platform.platform(),
             "manifest_sha256": self._hash_file(self.manifest_path),

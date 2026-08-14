@@ -3,7 +3,9 @@ from __future__ import annotations
 import importlib.util
 import json
 import re
+import shutil
 import sys
+import tempfile
 import unittest
 from pathlib import Path
 
@@ -19,10 +21,9 @@ if str(SCRIPT.parent) not in sys.path:
     sys.path.insert(0, str(SCRIPT.parent))
 
 from preflight_runtime._contract import (  # noqa: E402
-    ALLOWED_STAGES,
-    DIRECT_DEPENDENCIES,
     STAGE_ADAPTERS,
 )
+from preflight_runtime._projections import ContractProjection  # noqa: E402
 
 
 class RepositoryContractTests(unittest.TestCase):
@@ -78,19 +79,51 @@ class RepositoryContractTests(unittest.TestCase):
         metadata = (SKILL_ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
         self.assertIn("$project-preflight", metadata)
 
-    def test_runtime_docs_are_synchronized_with_canonical_stage_registry(self):
-        workflow = (SKILL_ROOT / "references" / "workflow.md").read_text(encoding="utf-8")
-        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
-        for stage in ALLOWED_STAGES:
-            self.assertIn(stage, workflow)
-        for stage, dependency in DIRECT_DEPENDENCIES.items():
-            self.assertIn(stage, skill)
-            self.assertIn(f"`{dependency}`", skill)
-        for stage, adapter in STAGE_ADAPTERS.items():
-            self.assertIn(stage, skill)
-            self.assertIn(f"`{adapter}`", skill)
-        self.assertIn("never ask them to invoke another Skill", skill)
-        self.assertIn("preflight_state.py directive", (SKILL_ROOT / "references" / "orchestration-contract.md").read_text(encoding="utf-8"))
+    def test_runtime_docs_are_exact_projections_of_the_canonical_registry(self):
+        self.assertEqual((), ContractProjection(REPO_ROOT).check())
+
+    def test_projection_module_detects_and_repairs_document_drift(self):
+        with tempfile.TemporaryDirectory() as temp:
+            copied = Path(temp) / "repository"
+            shutil.copytree(
+                REPO_ROOT,
+                copied,
+                ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"),
+            )
+            workflow = copied / "skills" / "project-preflight" / "references" / "workflow.md"
+            workflow.write_text(
+                workflow.read_text(encoding="utf-8").replace(
+                    "`project-preflight-grill-me`",
+                    "`project-preflight-wayfinder`",
+                    1,
+                ),
+                encoding="utf-8",
+            )
+            projection = ContractProjection(copied)
+            self.assertTrue(any(item.path.endswith("workflow.md") for item in projection.check()))
+            self.assertEqual(
+                ("skills/project-preflight/references/workflow.md",),
+                projection.write(),
+            )
+            self.assertEqual((), projection.check())
+            self.assertEqual((), projection.write())
+
+    def test_projection_module_detects_eval_mapping_drift(self):
+        with tempfile.TemporaryDirectory() as temp:
+            copied = Path(temp) / "repository"
+            shutil.copytree(
+                REPO_ROOT,
+                copied,
+                ignore=shutil.ignore_patterns(".git", "__pycache__", "*.pyc"),
+            )
+            cases_path = copied / "evals" / "cases.json"
+            cases = json.loads(cases_path.read_text(encoding="utf-8"))
+            cases["cases"][0]["expected"]["directive"]["adapter_skill"] = (
+                "project-preflight-wayfinder"
+            )
+            cases_path.write_text(json.dumps(cases), encoding="utf-8")
+            findings = ContractProjection(copied).check()
+            self.assertTrue(any("directive mapping" in item.message for item in findings))
 
     def test_behavior_eval_manifest_is_canonical_and_complete(self):
         manifest = json.loads((REPO_ROOT / "evals" / "cases.json").read_text(encoding="utf-8"))
@@ -107,6 +140,42 @@ class RepositoryContractTests(unittest.TestCase):
         manifest = json.loads((REPO_ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual("project-preflight", manifest["name"])
         self.assertEqual("./skills/", manifest["skills"])
+
+    def test_release_harness_and_budget_are_current(self):
+        manifest = json.loads(
+            (REPO_ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8")
+        )
+        version = manifest["version"]
+        changelog = (REPO_ROOT / "CHANGELOG.md").read_text(encoding="utf-8")
+        self.assertIn(f"## [{version}]", changelog)
+        for path in (
+            "README.md",
+            "README.zh-CN.md",
+            "CONTRIBUTING.md",
+            "SECURITY.md",
+            ".github/workflows/ci.yml",
+            ".github/workflows/release.yml",
+            "docs/upstream-adapter-policy.md",
+            "docs/decisions/0004-public-release-hardening.md",
+        ):
+            self.assertTrue((REPO_ROOT / path).is_file(), path)
+
+        budgets = json.loads((REPO_ROOT / "evals" / "budgets.json").read_text(encoding="utf-8"))
+        self.assertEqual(1, budgets["schema_version"])
+        profile = budgets["profiles"]["full-happy-path-high-reasoning"]
+        baseline = profile["baseline"]
+        ceiling = profile["regression_ceiling"]
+        self.assertTrue((REPO_ROOT / baseline["source"]).is_file())
+        self.assertGreater(ceiling["total_tokens"], baseline["total_tokens_approx"])
+        self.assertGreater(ceiling["latency_ms"], baseline["latency_ms_approx"])
+
+    def test_readmes_document_real_install_update_and_remove_commands(self):
+        for path in ("README.md", "README.zh-CN.md"):
+            text = (REPO_ROOT / path).read_text(encoding="utf-8")
+            self.assertIn("codex plugin add project-preflight@personal", text)
+            self.assertIn("codex plugin list", text)
+            self.assertIn("codex plugin remove project-preflight@personal", text)
+            self.assertIn("pull --ff-only", text)
 
     def test_all_stage_adapters_are_bundled_and_implicitly_invokable(self):
         for adapter in STAGE_ADAPTERS.values():

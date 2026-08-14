@@ -2,51 +2,16 @@
 
 from __future__ import annotations
 
-import ipaddress
 import json
 import os
 import re
-import socket
-import urllib.error
 import urllib.parse
-import urllib.request
 from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Callable
 
 from ._document import anchors, section
-
-
-def _public_remote_host(parsed: urllib.parse.ParseResult) -> str | None:
-    """Return an actionable error when remote checking could reach a non-public host."""
-
-    host = parsed.hostname
-    if not host:
-        return "remote URL has no hostname"
-    if host.casefold() == "localhost" or host.casefold().endswith(".local"):
-        return "remote checking refuses localhost and local-network hostnames"
-    try:
-        literal = ipaddress.ip_address(host)
-    except ValueError:
-        try:
-            addresses = {
-                item[4][0]
-                for item in socket.getaddrinfo(
-                    host,
-                    parsed.port or (443 if parsed.scheme == "https" else 80),
-                    type=socket.SOCK_STREAM,
-                )
-            }
-        except OSError as exc:
-            return f"remote hostname cannot be resolved safely: {exc}"
-        if not addresses:
-            return "remote hostname resolved to no addresses"
-        if any(not ipaddress.ip_address(address).is_global for address in addresses):
-            return "remote checking refuses hostnames that resolve to non-public addresses"
-    else:
-        if not literal.is_global:
-            return "remote checking refuses non-public IP addresses"
-    return None
+from ._remote import RemoteFetchError, RemoteRequest, SafeRemoteFetcher
 
 
 @dataclass
@@ -124,10 +89,10 @@ class GitHubIssueAdapter(ArtifactAdapter):
 
     def __init__(
         self,
-        opener: Callable[..., object] | None = None,
+        fetcher: SafeRemoteFetcher | None = None,
         token_provider: Callable[[], str | None] | None = None,
     ) -> None:
-        self._opener = opener or urllib.request.urlopen
+        self._fetcher = fetcher or SafeRemoteFetcher()
         self._token_provider = token_provider or (
             lambda: os.environ.get("GH_TOKEN") or os.environ.get("GITHUB_TOKEN")
         )
@@ -172,11 +137,16 @@ class GitHubIssueAdapter(ArtifactAdapter):
         token = self._token_provider()
         if token:
             headers["Authorization"] = f"Bearer {token}"
-        request = urllib.request.Request(api_url, headers=headers)
         try:
-            with self._opener(request, timeout=10) as response:
-                payload = json.loads(response.read().decode("utf-8"))
-        except (OSError, UnicodeError, ValueError, urllib.error.HTTPError) as exc:
+            response = self._fetcher.fetch(
+                RemoteRequest(
+                    api_url,
+                    headers=headers,
+                    allowed_content_types=("application/json",),
+                )
+            )
+            payload = json.loads(response.body.decode("utf-8"))
+        except (RemoteFetchError, UnicodeError, ValueError) as exc:
             findings.errors.append(f"artifact {key} GitHub Issue is not accessible: {exc}")
             return findings
         if not isinstance(payload, dict) or not payload.get("html_url") or not payload.get("title"):
@@ -185,8 +155,8 @@ class GitHubIssueAdapter(ArtifactAdapter):
 
 
 class RemoteUrlAdapter(ArtifactAdapter):
-    def __init__(self, opener: Callable[..., object] | None = None) -> None:
-        self._opener = opener or urllib.request.urlopen
+    def __init__(self, fetcher: SafeRemoteFetcher | None = None) -> None:
+        self._fetcher = fetcher or SafeRemoteFetcher()
 
     def matches(self, pointer: str) -> bool:
         return pointer.startswith(("http://", "https://"))
@@ -209,21 +179,15 @@ class RemoteUrlAdapter(ArtifactAdapter):
                 f"artifact {key} uses a generic remote URL; accessibility and semantic sufficiency were not checked"
             )
             return findings
-        host_error = _public_remote_host(parsed)
-        if host_error:
-            findings.errors.append(f"artifact {key}: {host_error}")
-            return findings
-        request = urllib.request.Request(
-            pointer,
-            headers={"User-Agent": "project-preflight-validator"},
-            method="GET",
-        )
         try:
-            with self._opener(request, timeout=10) as response:
-                status = getattr(response, "status", 200)
-                if status >= 400:
-                    findings.errors.append(f"artifact {key} remote URL returned HTTP {status}")
-        except (OSError, urllib.error.HTTPError) as exc:
+            self._fetcher.fetch(
+                RemoteRequest(
+                    pointer,
+                    headers={"User-Agent": "project-preflight-validator"},
+                    max_bytes=65_536,
+                )
+            )
+        except RemoteFetchError as exc:
             findings.errors.append(f"artifact {key} remote URL is not accessible: {exc}")
         findings.warnings.append(
             f"artifact {key} remote URL accessibility does not prove semantic Gate sufficiency"
@@ -280,12 +244,19 @@ class LocalPathAdapter(ArtifactAdapter):
 class ArtifactEvidenceChecker:
     """Select concrete adapters while keeping pointer behavior behind one seam."""
 
-    def __init__(self, adapters: tuple[ArtifactAdapter, ...] | None = None) -> None:
+    def __init__(
+        self,
+        adapters: tuple[ArtifactAdapter, ...] | None = None,
+        remote_fetcher: SafeRemoteFetcher | None = None,
+    ) -> None:
+        if adapters is not None and remote_fetcher is not None:
+            raise ValueError("provide adapters or remote_fetcher, not both")
+        fetcher = remote_fetcher or SafeRemoteFetcher()
         self._adapters = adapters or (
             NotRequiredAdapter(),
             InlineAdapter(),
-            GitHubIssueAdapter(),
-            RemoteUrlAdapter(),
+            GitHubIssueAdapter(fetcher),
+            RemoteUrlAdapter(fetcher),
             LocalPathAdapter(),
         )
 

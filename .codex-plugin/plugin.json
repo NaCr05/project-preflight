@@ -1,6 +1,6 @@
 {
   "name": "project-preflight",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "description": "A single-entry pre-coding orchestrator that turns rough software ideas into implementation-ready plans.",
   "author": {
     "name": "NaCr05",

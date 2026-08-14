@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "profiles": {
+    "full-happy-path-high-reasoning": {
+      "baseline": {
+        "date": "2026-08-14",
+        "plugin_version": "0.3.0",
+        "source": "evals/results-2026-08-14-automatic-orchestration.md",
+        "total_tokens_approx": 108000,
+        "latency_ms_approx": 600000,
+        "model": "not-recorded"
+      },
+      "regression_ceiling": {
+        "total_tokens": 130000,
+        "latency_ms": 720000
+      },
+      "policy": "A comparable full happy path above either ceiling requires investigation and an explicit accepted result before release."
+    }
+  }
+}

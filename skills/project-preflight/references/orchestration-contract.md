@@ -7,8 +7,10 @@ Project Preflight is the only user-facing entry. Bundled stage Skills are adapte
 Run:
 
 ```text
-python scripts/preflight_state.py directive --json
+python scripts/preflight_state.py directive --json --locale en
 ```
+
+Use `--locale en` for English and `--locale zh-CN` for Simplified Chinese. Select the language from the user's current request; locale changes wording only and never changes routing facts.
 
 The runtime returns exactly one directive:
 
@@ -29,7 +31,13 @@ Before entering any specialist Stage, and again after a resumed session, show th
 - the public capability label: `grill-me`, `wayfinder`, `to-spec`, or `to-tickets`;
 - a short reassurance that the user only needs to answer or confirm.
 
-Example:
+English example:
+
+```text
+Project Preflight · Discovery — Using `grill-me` (bundled Project Preflight adapter). Just answer or confirm.
+```
+
+Simplified Chinese example:
 
 ```text
 Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight 内置适配器）。你只需回答或确认。

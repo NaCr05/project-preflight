@@ -35,7 +35,7 @@ Candidate state is validated before atomic replacement. A failed operation leave
 ## Run the automatic loop
 
 1. Inspect project context without implementing production code. Validate existing state or initialize it from the user's rough paragraph.
-2. Run `directive`. Show its `announcement` before stage work so the user always knows which capability is active.
+2. Select `--locale en` for English or `--locale zh-CN` for Simplified Chinese based on the user's current language. Run `directive` with that locale and show its `announcement` before stage work so the user always knows which capability is active.
 3. For `RUN_STAGE_ADAPTER`, read and follow the bundled adapter at `../<adapter_skill>/SKILL.md`. Do this yourself; do not delegate invocation to the user.
 4. Keep one-question-at-a-time interaction where the adapter requires it. Persist its durable artifact or pointer.
 5. Return control to this orchestrator automatically, evaluate the current Gate, and use `advance` once when the evidence passes.
@@ -44,10 +44,12 @@ Candidate state is validated before atomic replacement. A failed operation leave
 
 Stage routing is canonical:
 
+<!-- project-preflight:generated stage-routing-list:start -->
 - `DISCOVERY` -> `project-preflight-grill-me` (shown to the user as `grill-me`)
-- `DECISION` -> `project-preflight-wayfinder` (shown as `wayfinder`)
-- `SPECIFICATION` -> `project-preflight-to-spec` (shown as `to-spec`)
-- `TICKETING` -> `project-preflight-to-tickets` (shown as `to-tickets`)
+- `DECISION` -> `project-preflight-wayfinder` (shown to the user as `wayfinder`)
+- `SPECIFICATION` -> `project-preflight-to-spec` (shown to the user as `to-spec`)
+- `TICKETING` -> `project-preflight-to-tickets` (shown to the user as `to-tickets`)
+<!-- project-preflight:generated stage-routing-list:end -->
 
 Do not pretend that Python invokes a Skill. The runtime chooses the stage and renders the directive; the Codex orchestrator loads and follows the bundled Skill instructions.
 

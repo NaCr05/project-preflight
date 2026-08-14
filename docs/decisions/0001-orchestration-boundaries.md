@@ -1,6 +1,6 @@
 # ADR 0001: Keep orchestration separate from planning capabilities
 
-- **Status:** Accepted; invocation mechanism amended by ADR 0002
+- **Status:** Accepted; invocation mechanism superseded by ADR 0003 and release boundaries hardened by ADR 0004
 - **Date:** 2026-08-13
 
 ## Context
@@ -41,7 +41,7 @@ Rejected because two synchronized artifacts create an unnecessary drift risk. YA
 
 ## Consequences
 
-- Missing upstream Skills block the affected stage instead of triggering an imitation.
+- A missing bundled Stage Adapter blocks the affected stage instead of triggering an imitation.
 - Remote and local artifacts share a pointer contract.
 - The State lifecycle module can enforce structural readiness, while human review remains responsible for product judgment and evidence quality.
 - Compatibility with upstream behavior must be rechecked as those Skills evolve.

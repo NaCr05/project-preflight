@@ -78,12 +78,13 @@ Artifact Evidence is checked through one adapter seam:
 | GitHub Issue URL | Verify Issue syntax; with `--check-remote`, query the GitHub Issue record. |
 | Other HTTP(S) URL | Report that semantic sufficiency is unverified; with `--check-remote`, also check accessibility. |
 
-Local pointers required for the current Stage must exist. A reachable URL proves location and accessibility, not semantic sufficiency; the Gate still requires human review of the evidence. Remote checking is read-only, rejects localhost and non-public network targets, and may use `GH_TOKEN` or `GITHUB_TOKEN` without storing either value.
+Local pointers required for the current Stage must exist. A reachable URL proves location and accessibility, not semantic sufficiency; the Gate still requires human review of the evidence. Remote checking is read-only. The Safe Remote Fetch Module rejects localhost and non-public targets, pins an approved address, revalidates every redirect, bounds response size and time, and strips credentials on cross-origin redirects. The GitHub Issue Adapter may use `GH_TOKEN` or `GITHUB_TOKEN` without storing either value.
 
 ## Stage invariants
 
 The current stage must match the first gate that has not passed:
 
+<!-- project-preflight:generated stage-invariant-table:start -->
 | Current stage | Required passed gates | Required artifact pointers |
 |---|---|---|
 | `IDEA` | None | None |
@@ -91,7 +92,8 @@ The current stage must match the first gate that has not passed:
 | `DECISION` | Gate 1 | `idea` |
 | `SPECIFICATION` | Gates 1–2 | `idea`, `decision_map` |
 | `TICKETING` | Gates 1–3 | `idea`, `decision_map`, `spec` |
-| `READY_FOR_IMPLEMENTATION` | Gates 1–4 | All four |
+| `READY_FOR_IMPLEMENTATION` | Gates 1–4 | `idea`, `decision_map`, `spec`, `tickets` |
+<!-- project-preflight:generated stage-invariant-table:end -->
 
 At non-ready stages, the gate owned by that stage must not already be `passed`. Later gates must not be passed either. `ready_for_implementation` is true if and only if the current stage is `READY_FOR_IMPLEMENTATION`.
 

@@ -214,6 +214,7 @@ def inspect_path(
     state_path: Path,
     repo_root: Path | None = None,
     check_remote: bool = False,
+    evidence_checker: ArtifactEvidenceChecker | None = None,
 ) -> ValidationReport:
     state_path = state_path.resolve()
     if repo_root is None:
@@ -222,7 +223,12 @@ def inspect_path(
         text = state_path.read_text(encoding="utf-8")
     except (OSError, UnicodeError) as exc:
         return ValidationReport((str(exc),), (), {})
-    return _inspect_text(text, repo_root.resolve(), check_remote)
+    return _inspect_text(
+        text,
+        repo_root.resolve(),
+        check_remote,
+        evidence_checker=evidence_checker,
+    )
 
 
 def validate_path(
@@ -399,9 +405,9 @@ class StateStore:
         data, body = split_state(text)
         return self._commit(data, body)
 
-    def directive(self) -> OrchestrationDirective:
+    def directive(self, locale: str | None = None) -> OrchestrationDirective:
         data, _ = self._load_valid()
-        return directive_for_state(data)
+        return directive_for_state(data, locale=locale)
 
     def _load_valid(self) -> tuple[dict[str, Any], str]:
         try:

@@ -13,14 +13,16 @@ IDEA
 
 `DISCOVERY`, `DECISION`, `SPECIFICATION`, and `TICKETING` each run through a bundled stage adapter selected automatically by `preflight_state.py directive`. The user invokes `$project-preflight` once and then only answers or confirms.
 
+<!-- project-preflight:generated stage-routing-table:start -->
 | Current Stage | Bundled adapter | Public Skill label | Durable result |
 |---|---|---|---|
 | `IDEA` | None | Project Preflight | Rough idea captured |
 | `DISCOVERY` | `project-preflight-grill-me` | `grill-me` | Canonical idea/discovery evidence |
 | `DECISION` | `project-preflight-wayfinder` | `wayfinder` | Decision map |
-| `SPECIFICATION` | `project-preflight-to-spec` | `to-spec` | Canonical spec |
+| `SPECIFICATION` | `project-preflight-to-spec` | `to-spec` | Canonical specification |
 | `TICKETING` | `project-preflight-to-tickets` | `to-tickets` | Ticket frontier |
 | `READY_FOR_IMPLEMENTATION` | None | Project Preflight | Implementation handoff |
+<!-- project-preflight:generated stage-routing-table:end -->
 
 ## Controlled loop
 

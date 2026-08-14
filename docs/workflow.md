@@ -29,7 +29,7 @@ The user does not operate the arrows. Project Preflight derives the current dire
 Each Stage starts—or resumes after interruption—with a compact banner:
 
 ```text
-Project Preflight · Decision — 正在使用 `wayfinder`（Project Preflight 内置适配器）。你只需回答或确认。
+Project Preflight · Decision — Using `wayfinder` (bundled Project Preflight adapter). Just answer or confirm.
 ```
 
 The banner appears once per Stage entry or resume, not before every question. Interviews ask one consequential question at a time. Defaults include a short rationale and require user confirmation when they change the product or architecture.

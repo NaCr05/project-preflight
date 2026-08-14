@@ -1,0 +1,36 @@
+# Changelog
+
+All notable changes to Project Preflight are documented here. Versions follow Semantic Versioning.
+
+## [0.3.1] - 2026-08-14
+
+### Added
+
+- English and Simplified Chinese orchestration announcements selected through `directive --locale`.
+- Safe Remote Fetch Module with address pinning, redirect revalidation, bounded responses, and cross-origin credential stripping.
+- Exact canonical contract projections for normative Skill and reference tables.
+- GitHub CI across Windows, Linux, Python 3.11, and Python 3.14.
+- Automated tagged release archives and SHA-256 checksums.
+- Source-install, upgrade, uninstall, contribution, security, upstream-review, and release guidance.
+- A recorded full-run cost and latency regression budget.
+
+### Changed
+
+- Repository contract tests now compare exact Stage-to-Adapter mappings instead of checking only for string presence.
+- Remote GitHub Issue and generic URL evidence checks share one hardened transport policy.
+
+## [0.3.0] - 2026-08-14
+
+- Replaced user-operated Handoff orchestration with a single-entry Plugin.
+- Bundled namespaced `grill-me`, `wayfinder`, `to-spec`, and `to-tickets` Stage Adapters.
+- Added visible Skill banners and automatic return to Project Preflight.
+- Preserved the State lifecycle, evidence adapters, regression, recovery, and behavior-eval harness.
+
+## [0.2.0] - 2026-08-14
+
+- Implemented and validated explicit Handoff orchestration as an experiment.
+- Added the deep State lifecycle Module, canonical registry, Artifact Evidence Adapters, and deterministic eval cases.
+
+## [0.1.0] - 2026-08-13
+
+- Introduced the gated Project Preflight workflow and validator.

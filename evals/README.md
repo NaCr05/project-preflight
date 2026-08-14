@@ -27,10 +27,26 @@ After a fresh-context evaluator completes the prompt, score the durable result:
 ```text
 python evals/run_behavior_evals.py score <prepared-directory> \
   --model <model-name> \
-  --dependency-version project-preflight=<version-or-commit>
+  --dependency-version project-preflight=<version-or-commit> \
+  --total-tokens <observed-total> \
+  --latency-ms <observed-milliseconds>
 ```
 
-The scorer writes `result.json` and `result.md`. Both include the date, model, dependency versions, optional latency and cost, validator findings, baseline/result fingerprints, each rubric check, and critical failures.
+The scorer writes `result.json` and `result.md`. Both include the date, model, dependency versions, optional tokens, latency and cost, validator findings, baseline/result fingerprints, each rubric check, and critical failures.
+
+## Cost and latency budget
+
+`budgets.json` records the first comparable full happy-path baseline and the release regression ceilings. A new full run above either ceiling requires investigation and an explicitly accepted result before release. Always record the model and reasoning effort on future runs; the initial v0.3.0 baseline did not capture the exact model and therefore supports regression triage, not cross-model performance claims.
+
+After a comparable full run, enforce both ceilings with the observed metrics:
+
+```text
+python evals/run_behavior_evals.py check-budget full-happy-path-high-reasoning \
+  --total-tokens <observed-total> \
+  --latency-ms <observed-milliseconds>
+```
+
+The command exits nonzero if either ceiling is exceeded. Accepting a regression requires updating the policy evidence and recording the rationale in the release notes or an ADR; do not bypass the check silently.
 
 ## Evidence boundary
 

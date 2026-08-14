@@ -6,6 +6,7 @@ from dataclasses import asdict, dataclass
 from typing import Any, Mapping
 
 from ._contract import DIRECT_DEPENDENCIES, STAGE_ADAPTERS, STAGE_PURPOSES
+from ._messages import message
 
 
 @dataclass(frozen=True)
@@ -23,7 +24,9 @@ class OrchestrationDirective:
         return asdict(self)
 
 
-def directive_for_state(data: Mapping[str, Any]) -> OrchestrationDirective:
+def directive_for_state(
+    data: Mapping[str, Any], locale: str | None = None
+) -> OrchestrationDirective:
     """Derive the next conversational action from validated state."""
 
     stage = str(data["current_stage"])
@@ -33,7 +36,7 @@ def directive_for_state(data: Mapping[str, Any]) -> OrchestrationDirective:
             stage=stage,
             display_skill=None,
             adapter_skill=None,
-            announcement="Project Preflight · Idea — 正在记录你的初步想法。你只需用一段话描述它。",
+            announcement=message(locale, "idea"),
             instruction="Capture the user's rough idea, initialize durable state, and continue to DISCOVERY.",
         )
     if stage == "READY_FOR_IMPLEMENTATION":
@@ -42,7 +45,7 @@ def directive_for_state(data: Mapping[str, Any]) -> OrchestrationDirective:
             stage=stage,
             display_skill=None,
             adapter_skill=None,
-            announcement="Project Preflight · Ready — 四道 Gate 已通过，正在整理实施交接。",
+            announcement=message(locale, "ready"),
             instruction="Present the canonical spec, ticket set, first tracer bullet, verification, and residual risks; then stop.",
         )
 
@@ -55,7 +58,12 @@ def directive_for_state(data: Mapping[str, Any]) -> OrchestrationDirective:
             stage=stage,
             display_skill=display_skill,
             adapter_skill=adapter_skill,
-            announcement=f"Project Preflight · {stage.title()} — `{display_skill}` 阶段适配器当前不可用。",
+            announcement=message(
+                locale,
+                "blocked",
+                stage=stage.title(),
+                skill=display_skill,
+            ),
             instruction="Keep the current Stage, record the blocker, and explain how to restore the bundled adapter.",
         )
 
@@ -65,9 +73,11 @@ def directive_for_state(data: Mapping[str, Any]) -> OrchestrationDirective:
         stage=stage,
         display_skill=display_skill,
         adapter_skill=adapter_skill,
-        announcement=(
-            f"Project Preflight · {stage.title()} — 正在使用 `{display_skill}`"
-            "（Project Preflight 内置适配器）。你只需回答或确认。"
+        announcement=message(
+            locale,
+            "running",
+            stage=stage.title(),
+            skill=display_skill,
         ),
         instruction=(
             f"Load and follow the bundled `${adapter_skill}` Skill to {purpose}. "

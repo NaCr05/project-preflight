@@ -2,12 +2,14 @@
 
 The Plugin bundles four namespaced stage adapters. A normal installation therefore does not require the user to install or invoke `grill-me`, `wayfinder`, `to-spec`, or `to-tickets` separately.
 
+<!-- project-preflight:generated dependency-table:start -->
 | Public capability | Bundled Skill | Stage |
 |---|---|---|
 | `grill-me` | `project-preflight-grill-me` | `DISCOVERY` |
 | `wayfinder` | `project-preflight-wayfinder` | `DECISION` |
 | `to-spec` | `project-preflight-to-spec` | `SPECIFICATION` |
 | `to-tickets` | `project-preflight-to-tickets` | `TICKETING` |
+<!-- project-preflight:generated dependency-table:end -->
 
 Dependency status records runtime observation:
 

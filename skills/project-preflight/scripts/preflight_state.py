@@ -90,6 +90,12 @@ def build_parser() -> argparse.ArgumentParser:
 
     directive = subparsers.add_parser("directive", help="Print the next automatic orchestration directive")
     directive.add_argument("--json", action="store_true", help="Emit the directive as JSON")
+    directive.add_argument(
+        "--locale",
+        default="en",
+        choices=("en", "zh-CN"),
+        help="Language for the user-visible announcement (default: en)",
+    )
 
     recover = subparsers.add_parser("recover", help="Atomically restore an explicitly supplied valid state")
     recover.add_argument("--source", type=Path, required=True)
@@ -123,7 +129,7 @@ def main(argv: list[str] | None = None) -> int:
             _print_report(store.regress(args.target_stage, args.reason, _change(args)))
             return 0
         if args.command == "directive":
-            directive = store.directive()
+            directive = store.directive(locale=args.locale)
             if args.json:
                 print(json.dumps(directive.to_dict(), ensure_ascii=False, indent=2))
             else:

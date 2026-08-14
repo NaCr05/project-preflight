@@ -6,7 +6,6 @@ import tempfile
 import unittest
 from datetime import datetime, timezone
 from pathlib import Path
-from unittest import mock
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -20,6 +19,12 @@ from preflight_runtime import (  # noqa: E402
     StateStore,
     inspect_path,
     render_initial_state,
+)
+from preflight_runtime._evidence import ArtifactEvidenceChecker  # noqa: E402
+from preflight_runtime._remote import (  # noqa: E402
+    RemoteTransport,
+    SafeRemoteFetcher,
+    TransportResponse,
 )
 
 
@@ -46,8 +51,10 @@ class StateLifecycleTests(unittest.TestCase):
             self.assertEqual("RUN_STAGE_ADAPTER", directive.kind)
             self.assertEqual("grill-me", directive.display_skill)
             self.assertEqual("project-preflight-grill-me", directive.adapter_skill)
-            self.assertIn("正在使用 `grill-me`", directive.announcement)
+            self.assertIn("Using `grill-me`", directive.announcement)
             self.assertIn("do not ask the user to invoke", directive.instruction.casefold())
+            chinese = store.directive(locale="zh-CN")
+            self.assertIn("正在使用 `grill-me`", chinese.announcement)
 
     def test_invalid_candidate_does_not_replace_last_valid_state(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -171,17 +178,23 @@ class StateLifecycleTests(unittest.TestCase):
             self.assertTrue(any("semantic sufficiency" in warning for warning in report.warnings))
 
     def test_github_issue_adapter_checks_structured_issue_record(self):
-        class FakeResponse:
-            status = 200
+        class FakeTransport(RemoteTransport):
+            def __init__(self):
+                self.calls = []
 
-            def __enter__(self):
-                return self
+            def request(self, **kwargs):
+                self.calls.append(kwargs)
+                return TransportResponse(
+                    200,
+                    {"content-type": "application/json"},
+                    b'{"html_url":"https://github.com/example/demo/issues/7","title":"Spec"}',
+                )
 
-            def __exit__(self, exc_type, exc, traceback):
-                return False
-
-            def read(self):
-                return b'{"html_url":"https://github.com/example/demo/issues/7","title":"Spec"}'
+        transport = FakeTransport()
+        resolver = lambda host, port, **kwargs: [(2, 1, 6, "", ("93.184.216.34", port))]
+        checker = ArtifactEvidenceChecker(
+            remote_fetcher=SafeRemoteFetcher(transport=transport, resolver=resolver)
+        )
 
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
@@ -197,14 +210,17 @@ class StateLifecycleTests(unittest.TestCase):
                 "idea: null", 'idea: "https://github.com/example/demo/issues/7"'
             )
             state.write_text(text, encoding="utf-8")
-            with mock.patch("urllib.request.urlopen", return_value=FakeResponse()) as opener:
-                report = inspect_path(state, root, check_remote=True)
+            report = inspect_path(
+                state,
+                root,
+                check_remote=True,
+                evidence_checker=checker,
+            )
             self.assertTrue(report.valid, report.errors)
             self.assertEqual((), report.warnings)
-            request = opener.call_args.args[0]
             self.assertEqual(
                 "https://api.github.com/repos/example/demo/issues/7",
-                request.full_url,
+                "https://api.github.com" + transport.calls[0]["target"],
             )
 
     def test_remote_check_refuses_non_public_targets(self):
@@ -222,10 +238,8 @@ class StateLifecycleTests(unittest.TestCase):
                 "idea: null", 'idea: "http://127.0.0.1/private"'
             )
             state.write_text(text, encoding="utf-8")
-            with mock.patch("urllib.request.urlopen") as opener:
-                report = inspect_path(state, root, check_remote=True)
+            report = inspect_path(state, root, check_remote=True)
             self.assertTrue(any("non-public IP" in error for error in report.errors))
-            opener.assert_not_called()
 
     def test_template_asset_is_derived_from_contract(self):
         asset = REPO_ROOT / "skills" / "project-preflight" / "assets" / "preflight-template.md"

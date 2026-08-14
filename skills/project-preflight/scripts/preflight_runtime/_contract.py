@@ -20,15 +20,51 @@ class StageContract:
     required_artifacts: tuple[str, ...]
     display_skill: str | None
     adapter_skill: str | None
+    durable_result: str
 
 
 STAGE_CONTRACTS = (
-    StageContract("IDEA", 0, (), None, None),
-    StageContract("DISCOVERY", 0, ("idea",), "grill-me", "project-preflight-grill-me"),
-    StageContract("DECISION", 1, ("idea",), "wayfinder", "project-preflight-wayfinder"),
-    StageContract("SPECIFICATION", 2, ("idea", "decision_map"), "to-spec", "project-preflight-to-spec"),
-    StageContract("TICKETING", 3, ("idea", "decision_map", "spec"), "to-tickets", "project-preflight-to-tickets"),
-    StageContract("READY_FOR_IMPLEMENTATION", 4, ARTIFACT_KEYS, None, None),
+    StageContract("IDEA", 0, (), None, None, "Rough idea captured"),
+    StageContract(
+        "DISCOVERY",
+        0,
+        ("idea",),
+        "grill-me",
+        "project-preflight-grill-me",
+        "Canonical idea/discovery evidence",
+    ),
+    StageContract(
+        "DECISION",
+        1,
+        ("idea",),
+        "wayfinder",
+        "project-preflight-wayfinder",
+        "Decision map",
+    ),
+    StageContract(
+        "SPECIFICATION",
+        2,
+        ("idea", "decision_map"),
+        "to-spec",
+        "project-preflight-to-spec",
+        "Canonical specification",
+    ),
+    StageContract(
+        "TICKETING",
+        3,
+        ("idea", "decision_map", "spec"),
+        "to-tickets",
+        "project-preflight-to-tickets",
+        "Ticket frontier",
+    ),
+    StageContract(
+        "READY_FOR_IMPLEMENTATION",
+        4,
+        ARTIFACT_KEYS,
+        None,
+        None,
+        "Implementation handoff",
+    ),
 )
 STAGES_BY_NAME = {contract.name: contract for contract in STAGE_CONTRACTS}
 ALLOWED_STAGES = tuple(STAGES_BY_NAME)

@@ -1,4 +1,4 @@
-# Project Preflight v0.3 Product Specification
+# Project Preflight v0.3.1 Product Specification
 
 ## Purpose
 
@@ -51,7 +51,7 @@ Solo developers, open-source maintainers, contributors auditing an existing plan
 - **Failure:** missing adapters, invalid state, and contradictory evidence block advancement with an actionable message.
 - **Evaluation:** deterministic tests cover directives, visibility, lifecycle, rollback, atomic writes, Plugin contracts, and behavior fixtures.
 
-## v0.3 success criteria
+## v0.3.1 success criteria
 
 - Plugin and all five Skills pass their official structure validators.
 - A rough idea yields a `RUN_STAGE_ADAPTER` directive for the bundled discovery adapter without a user-invoked Handoff.
@@ -59,10 +59,14 @@ Solo developers, open-source maintainers, contributors auditing an existing plan
 - Behavior evals cover automatic routing, missing adapter blocking, adoption, rollback, and final readiness.
 - The Handoff experiment remains preserved on its branch while ADR 0003 governs the new branch.
 - No current workflow instruction uses `to-prd` or asks the user to paste another Skill command.
+- User-visible Stage announcements are available in English and Simplified Chinese without changing routing facts.
+- Remote checks revalidate redirects, pin approved public addresses, bound responses, and strip credentials across origins.
+- CI verifies tests, exact contract projections, templates, and behavior manifests on Windows and Linux.
+- Full happy-path forward tests record tokens and latency and compare them with `evals/budgets.json`.
 
 ## Deferred work
 
 - First-class native Skill composition if Codex exposes a stable dependency API.
 - Remote tracker publishing adapters beyond existing read-only evidence checks.
 - A synchronization tool for deliberately adopting future upstream workflow improvements.
-- Statistical model cost and latency benchmarks after real traces exist.
+- Statistical cost and latency distributions after multiple comparable real traces exist.

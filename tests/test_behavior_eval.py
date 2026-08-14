@@ -13,7 +13,7 @@ for path in (EVAL_ROOT, SCRIPT_ROOT):
     if str(path) not in sys.path:
         sys.path.insert(0, str(path))
 
-from preflight_eval import BehaviorEvalHarness  # noqa: E402
+from preflight_eval import BehaviorEvalHarness, EvalBudgetRegistry  # noqa: E402
 from preflight_runtime import StateChange, StateStore  # noqa: E402
 
 
@@ -86,10 +86,12 @@ class BehaviorEvalTests(unittest.TestCase):
                     dependency_versions={"project-preflight": "working-tree"},
                     latency_ms=1,
                     cost_usd=0.0,
+                    total_tokens=1,
                 )
                 self.assertTrue(result.passed, (case_id, result.to_dict()))
                 self.assertEqual((8, 8), (result.score, result.maximum_score))
                 self.assertIn("manifest_sha256", result.metadata)
+                self.assertEqual(1, result.metadata["total_tokens"])
 
     def test_unchanged_fixture_cannot_pass(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -116,6 +118,23 @@ class BehaviorEvalTests(unittest.TestCase):
             self.harness.write_result(result, json_path, markdown_path)
             self.assertIn('"score": 8', json_path.read_text(encoding="utf-8"))
             self.assertIn("| Check | Result | Evidence |", markdown_path.read_text(encoding="utf-8"))
+
+    def test_budget_registry_enforces_token_and_latency_ceilings(self):
+        registry = EvalBudgetRegistry(EVAL_ROOT / "budgets.json")
+        within_budget = registry.check(
+            "full-happy-path-high-reasoning",
+            total_tokens=130000,
+            latency_ms=720000,
+        )
+        over_budget = registry.check(
+            "full-happy-path-high-reasoning",
+            total_tokens=130001,
+            latency_ms=720001,
+        )
+
+        self.assertTrue(within_budget.passed)
+        self.assertFalse(over_budget.passed)
+        self.assertEqual(2, len(over_budget.violations))
 
     @staticmethod
     def _store(prepared: Path) -> StateStore:
