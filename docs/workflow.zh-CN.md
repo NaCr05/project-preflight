@@ -9,21 +9,16 @@
 ```mermaid
 flowchart TD
     A["调用 $project-preflight<br/>提交模糊想法"] --> B["初始化项目状态<br/>.project/preflight.md"]
-    B --> C["DISCOVERY<br/>grill-me"]
-    C --> D{"Gate 1<br/>问题是否清楚"}
+    B --> C["输出显式 Handoff<br/>使用 $grill-me ..."]
+    C --> U1["你调用 $grill-me"]
+    U1 --> R1["你恢复 $project-preflight"]
+    R1 --> D{"Gate 1<br/>问题是否清楚"}
     D -->|"未通过"| C
-    D -->|"通过"| E["DECISION<br/>wayfinder"]
-    E --> F{"Gate 2<br/>决策是否就绪"}
-    F -->|"未通过"| E
-    F -->|"通过"| G["SPECIFICATION<br/>to-spec"]
-    G --> H{"Gate 3<br/>规格是否就绪"}
-    H -->|"缺少决策"| E
-    H -->|"需要补充规格"| G
-    H -->|"通过"| I["TICKETING<br/>to-tickets"]
-    I --> J{"Gate 4<br/>执行是否就绪"}
-    J -->|"范围不清"| G
-    J -->|"切片需要调整"| I
-    J -->|"通过"| K["READY_FOR_IMPLEMENTATION"]
+    D -->|"通过"| E["输出 Handoff<br/>$wayfinder"]
+    E --> U2["调用专项 Skill<br/>再恢复 $project-preflight"]
+    U2 --> F{"Gate 2–4<br/>重复同一循环"}
+    F -->|"证据不足"| E
+    F -->|"全部通过"| K["READY_FOR_IMPLEMENTATION"]
     K --> L["单独授权<br/>实施第一条 Ticket"]
 ```
 
@@ -32,11 +27,23 @@ flowchart TD
 | 阶段 | 专项能力 | 你的职责 | 持久化产物 | 离开条件 |
 |---|---|---|---|---|
 | `IDEA` | Project Preflight | 提供初始想法 | Idea 和状态文件 | Idea 指针存在 |
-| `DISCOVERY` | `grill-me` | 每次回答一个聚焦的产品问题 | 问题清晰度证据 | Gate 1 通过 |
-| `DECISION` | `wayfinder` | 在选项与权衡之间作出判断 | Decision Map，或有理由的 `not-required` | Gate 2 通过 |
-| `SPECIFICATION` | `to-spec` | 确认测试 seam 并审查范围 | 规范 Spec | Gate 3 通过 |
-| `TICKETING` | `to-tickets` | 审查 Ticket 粒度和依赖关系 | 已批准的 Tracer Bullet Tickets | Gate 4 通过 |
+| `DISCOVERY` | `grill-me` | 显式调用它，并逐个回答聚焦的产品问题 | 问题清晰度证据 | Gate 1 通过 |
+| `DECISION` | `wayfinder` | 显式调用它，并在选项与权衡之间作出判断 | Decision Map，或有理由的 `not-required` | Gate 2 通过 |
+| `SPECIFICATION` | `to-spec` | 显式调用它，确认测试 seam 并审查范围 | 规范 Spec | Gate 3 通过 |
+| `TICKETING` | `to-tickets` | 显式调用它，并审查 Ticket 粒度和依赖关系 | 已批准的 Tracer Bullet Tickets | Gate 4 通过 |
 | `READY_FOR_IMPLEMENTATION` | Project Preflight | 决定是否正式开始编码 | 精确的实施交接 | Preflight 完成 |
+
+## Handoff 循环
+
+Project Preflight 不会在背后自动串联规划 Skills。每个专项阶段都会：
+
+1. 验证当前状态，并检查所需 Skill 是否出现在当前活动目录中；
+2. 输出一条以 `使用 $grill-me`、`使用 $wayfinder`、`使用 $to-spec` 或 `使用 $to-tickets` 开头的准确指令；
+3. 停止当前运行，由你显式调用该 Skill；
+4. 要求上游 Skill 保存或指出持久化产物，然后让你返回 `$project-preflight`；
+5. 只有在你恢复后才评估一个 Gate。
+
+这个暂停是刻意设计的。磁盘上存在 Skill 目录，并不能证明当前 Session 可以调用它；而且多个上游 Skill 本来就要求用户显式调用。
 
 ## 第 0 步：记录想法并初始化状态
 
@@ -67,7 +74,7 @@ Project Preflight 会检查仓库、验证已有状态、检查当前阶段所�
 
 ## 第 1 步：Discovery——把问题想清楚
 
-Project Preflight 将 `DISCOVERY` 路由给 `grill-me`。这里是一段对话，而不是瞬间生成的完整方案。问题原则上一次只问一个；能够从仓库发现的事实应由 Codex 自己检查，真正需要你决定的问题才会交给你。
+进入 `DISCOVERY` 后，Project Preflight 会输出准确的 `$grill-me` Handoff 并停止。你显式调用它，结束后再恢复 `$project-preflight`。这里是一段对话，而不是瞬间生成的完整方案。问题原则上一次只问一个；能够从仓库发现的事实应由 Codex 自己检查，真正需要你决定的问题才会交给你。
 
 Discovery 会明确：
 
@@ -85,7 +92,7 @@ Discovery 会明确：
 
 ## 第 2 步：Decision——解决可能推翻架构的未知项
 
-Project Preflight 将 `DECISION` 路由给 `wayfinder`。Wayfinder 先定义规划终点，再绘制已知 Decision Frontier；这里处理的是决策任务，不是编码任务。
+进入 `DECISION` 后，Project Preflight 会输出准确的 `$wayfinder` Handoff 并停止。你显式调用它，让 Wayfinder 保存 Decision Map，再恢复 `$project-preflight`。Wayfinder 先定义规划终点，再绘制已知 Decision Frontier；这里处理的是决策任务，不是编码任务。
 
 常见问题包括：
 
@@ -103,7 +110,7 @@ Project Preflight 将 `DECISION` 路由给 `wayfinder`。Wayfinder 先定义规�
 
 ## 第 3 步：Specification——冻结已批准的项目
 
-Project Preflight 将 `SPECIFICATION` 路由给 `to-spec`。这一阶段综合已有讨论，不重新开启需求发散，也不自行添加功能。在正式生成 Spec 前，它可能请你确认最高层、最有价值的测试 seam。
+进入 `SPECIFICATION` 后，Project Preflight 会输出准确的 `$to-spec` Handoff 并停止。你显式调用它，保存或链接规范 Spec，再恢复 `$project-preflight`。这一阶段综合已有讨论，不重新开启需求发散，也不自行添加功能。在正式生成 Spec 前，它可能请你确认最高层、最有价值的测试 seam。
 
 规范 Spec 通常包括：
 
@@ -121,7 +128,7 @@ Project Preflight 将 `SPECIFICATION` 路由给 `to-spec`。这一阶段综合�
 
 ## 第 4 步：Ticketing——建立安全的执行 Frontier
 
-Project Preflight 将 `TICKETING` 路由给 `to-tickets`。它会先提出带编号的拆分方案，请你审查：
+进入 `TICKETING` 后，Project Preflight 会输出准确的 `$to-tickets` Handoff 并停止。你显式调用它，等 Ticket Frontier 持久化后再恢复 `$project-preflight`。它会先提出带编号的拆分方案，请你审查：
 
 - 每条 Ticket 是否过大或过小；
 - 哪些 Ticket 应合并或继续拆分；
@@ -154,7 +161,7 @@ Project Preflight 将 `TICKETING` 路由给 `to-tickets`。它会先提出带编
 
 ## 控制点与预期暂停
 
-Project Preflight 不会在一次无人确认的执行中连续跨越多个 Gate。当前采访可以持续到一个问题得到解决，但作出 Gate 结论后，它会先向你提供可审查状态，再路由到下一阶段。
+Project Preflight 不会在同一次运行中调用上游 Skill，也不会连续跨越多个 Gate。每个专项阶段都以用户显式调用的 Handoff 结束；每次 Gate 评估都只在你明确返回后开始。
 
 每个检查点应当看到四项内容：
 
@@ -175,7 +182,7 @@ Next Action
 使用 $project-preflight 恢复这个项目的 preflight。
 ```
 
-Agent 会验证 `.project/preflight.md`、检查产物指针，并从最早缺少证据的 Gate 继续，不会重做已完成工作。
+Agent 会通过 State lifecycle module 验证 `.project/preflight.md`、检查 Artifact Evidence 指针，并从最早缺少证据的 Gate 继续，不会重做已完成工作。无效候选状态永远不会替换上一份有效文件。
 
 ## 现实变化时回退
 

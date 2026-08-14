@@ -217,6 +217,20 @@ class ValidatePreflightTests(unittest.TestCase):
         errors = self.validate_text(text)
         self.assertTrue(any("if and only if" in error for error in errors))
 
+    def test_rejects_missing_direct_dependency_key(self):
+        text = state_text(
+            stage="IDEA",
+            previous=None,
+            ready=False,
+            gates=("not_evaluated", "not_evaluated", "not_evaluated", "not_evaluated"),
+            idea=None,
+            decision_map=None,
+            spec=None,
+            tickets=None,
+        ).replace('  to-tickets: "available"\n', "")
+        errors = self.validate_text(text)
+        self.assertTrue(any("dependencies must contain exactly" in error for error in errors))
+
 
 if __name__ == "__main__":
     unittest.main()

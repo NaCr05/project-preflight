@@ -4,20 +4,22 @@
 
 > A gated pre-coding workflow orchestrator for AI coding agents.
 
-`project-preflight` turns a vague software idea—or a partially planned project—into an evidence-backed implementation handoff. It detects the current stage, routes work through compatible planning Skills, persists progress across sessions, and stops production coding until the project is demonstrably ready.
+`project-preflight` turns a vague software idea—or a partially planned project—into an evidence-backed implementation handoff. It detects the current stage, gives you the exact planning Skill command to invoke, validates the result when you return, persists progress across sessions, and stops production coding until the project is demonstrably ready.
 
 ## How it works
 
 ```mermaid
 flowchart LR
-    A["Vague idea"] --> B["Discovery<br/>grill-me"]
-    B -->|"Gate 1"| C["Decisions<br/>wayfinder"]
-    C -->|"Gate 2"| D["Specification<br/>to-spec"]
-    D -->|"Gate 3"| E["Tickets<br/>to-tickets"]
-    E -->|"Gate 4"| F["READY_FOR_IMPLEMENTATION"]
+    A["Vague idea"] --> P1["$project-preflight"]
+    P1 -->|"explicit handoff"| B["$grill-me"]
+    B -->|"resume"| P2["$project-preflight<br/>Gate 1"]
+    P2 --> C["$wayfinder → resume"]
+    C --> D["$to-spec → resume"]
+    D --> E["$to-tickets → resume"]
+    E --> F["READY_FOR_IMPLEMENTATION"]
 ```
 
-Project Preflight advances one evidence-backed gate at a time. You remain responsible for product and architecture decisions; Codex interviews, maps decisions, synthesizes the approved spec, and proposes a reviewable ticket frontier. The endpoint is an implementation handoff—not completed product code.
+Project Preflight advances one evidence-backed Gate at a time. Each specialist Stage is a visible handoff: Project Preflight prints an exact `$skill-name` instruction, stops, and waits for you to invoke it. When its durable result exists, you explicitly resume `$project-preflight` for Gate evaluation. The endpoint is an implementation handoff—not completed product code.
 
 **[Read the complete workflow guide →](docs/workflow.md)**
 
@@ -26,6 +28,7 @@ Project Preflight advances one evidence-backed gate at a time. You remain respon
 Planning Skills are useful individually, but a project can still skip a step, lose state between sessions, duplicate decisions across documents, or treat the existence of a spec as proof of readiness. Project Preflight supplies the missing lifecycle:
 
 - stage detection and resumption;
+- explicit user-invoked handoffs instead of hidden Skill chaining;
 - evidence-based gates;
 - tracker-agnostic artifact pointers;
 - scope and implementation guardrails;
@@ -49,7 +52,7 @@ Copy `skills/project-preflight` into your Codex Skills directory as `project-pre
 <CODEX_HOME>/skills/project-preflight
 ```
 
-Install the four upstream Skills separately. Project Preflight checks stage dependencies before routing and stops with a useful blocker when one is unavailable.
+Install the four upstream Skills separately and make sure they appear in the active Skill catalog. Project Preflight checks the current Stage dependency before emitting a handoff and stops with a useful blocker when explicit invocation is unavailable.
 
 ## Use it
 
@@ -79,6 +82,8 @@ The Skill maintains one canonical state file in the target project:
 
 The file records stage, gate status, blockers, and pointers to the canonical idea, decision map, spec, and ticket set. It does not duplicate those artifacts.
 
+Project Preflight mutates this file through its bundled State lifecycle module. Candidate transitions are validated before an atomic replacement, so a failed update leaves the last valid state unchanged. Remote pointers produce explicit warnings; GitHub Issue pointers can also be checked read-only with `--check-remote`.
+
 ## Readiness gates
 
 1. **Problem clarity** — user, problem, value, input, output, MVP, non-goals, and measurable success are clear.
@@ -91,11 +96,11 @@ Only Gate 4 produces `READY_FOR_IMPLEMENTATION`.
 ## Repository layout
 
 - `skills/project-preflight/` — the distributable Skill.
-- `docs/product-spec.md` — v0.1 product scope and success criteria.
+- `docs/product-spec.md` — v0.2 product scope and success criteria.
 - `docs/workflow.md` — complete user journey, gates, artifacts, pauses, and rollback behavior.
 - `docs/decisions/` — append-only architectural rationale.
 - `tests/` — deterministic state-contract tests.
-- `evals/` — realistic behavioral cases and dated forward-test evidence.
+- `evals/` — machine-readable behavioral cases, isolated fixtures, reproducible scoring, and dated forward-test evidence.
 
 ## Validate changes
 
@@ -104,13 +109,15 @@ The validator uses only the Python standard library:
 ```text
 python -m unittest discover -s tests -v
 python skills/project-preflight/scripts/validate_preflight.py tests/fixtures/valid-idea.md --repo-root tests/fixtures
+python skills/project-preflight/scripts/preflight_state.py template --check skills/project-preflight/assets/preflight-template.md
+python evals/run_behavior_evals.py list
 ```
 
 Run the Skill Creator `quick_validate.py` against `skills/project-preflight` to validate packaging metadata.
 
 ## Status
 
-This repository currently targets a small, reviewable v0.1 contract: local Markdown state, optional remote tracker pointers, explicit upstream dependencies, and deterministic readiness validation. A self-hosted local happy path has reached validated `READY_FOR_IMPLEMENTATION`; live remote-tracker publication and automatic dependency installation are intentionally deferred.
+This repository now uses explicit Handoff orchestration plus a validated State lifecycle interface. Local Markdown remains the default; inline and local pointers are checked deterministically, GitHub Issue pointers have a real read adapter, and generic remote URLs are never silently treated as verified. Upstream publication behavior and automatic dependency installation remain intentionally separate.
 
 ## License
 

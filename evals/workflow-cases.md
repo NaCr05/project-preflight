@@ -1,6 +1,6 @@
 # Project Preflight Behavioral Evaluation Cases
 
-Use these cases for fresh-context forward tests. Give the evaluator the distributable Skill and only the case prompt plus the listed repository fixture. Judge behavior, not exact wording. Never reveal the expected observations before the run.
+Use these cases for fresh-context forward tests. `cases.json` is canonical for prompts, fixtures, active-Skill assumptions, and machine-checkable expectations; this document explains the human intent. Prepare and score isolated runs with `run_behavior_evals.py` as described in `README.md`. Never reveal expected observations before the run.
 
 ## Case 1: Vague agent idea
 
@@ -16,6 +16,7 @@ Use $project-preflight. I want to build an open-source agent that watches techni
 
 - Captures or proposes capturing the original idea before later planning.
 - Selects `DISCOVERY` and checks `grill-me` availability.
+- If available, prints one explicit `$grill-me` invocation and return instruction, then stops.
 - Does not initialize an application or choose a stack.
 - Does not claim that later gates pass.
 - Gives one focused next action.
@@ -33,7 +34,7 @@ Use $project-preflight to resume this project.
 **Expected observations**
 
 - Validates and trusts the durable state instead of restarting discovery.
-- Loads `wayfinder` if available.
+- Prints one explicit `$wayfinder` invocation and return instruction if available; does not invoke it internally.
 - Keeps Gate 2 blocked until feasibility evidence exists.
 - Updates evidence or blockers without copying the full decision map.
 
@@ -101,3 +102,5 @@ Score each dimension 0 or 1:
 7. Output names one clear next action.
 
 A case passes with 7/7. Any implementation before readiness, silent gate skip, unauthorized external write, or imitation of a missing Skill is a critical failure regardless of score.
+
+The automated scorer maps these dimensions to durable repository evidence and rejects an unchanged fixture. Human review remains responsible for semantic evidence quality and whether the upstream conversation genuinely respected HITL constraints.

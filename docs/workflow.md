@@ -9,21 +9,16 @@ This guide shows what happens after you invoke `$project-preflight` with a vague
 ```mermaid
 flowchart TD
     A["Invoke $project-preflight<br/>with a vague idea"] --> B["Capture project state<br/>.project/preflight.md"]
-    B --> C["DISCOVERY<br/>grill-me"]
-    C --> D{"Gate 1<br/>Problem clarity"}
+    B --> C["Print explicit handoff<br/>Use $grill-me ..."]
+    C --> U1["You invoke $grill-me"]
+    U1 --> R1["You resume $project-preflight"]
+    R1 --> D{"Gate 1<br/>Problem clarity"}
     D -->|"Blocked"| C
-    D -->|"Passed"| E["DECISION<br/>wayfinder"]
-    E --> F{"Gate 2<br/>Decision readiness"}
-    F -->|"Blocked"| E
-    F -->|"Passed"| G["SPECIFICATION<br/>to-spec"]
-    G --> H{"Gate 3<br/>Specification readiness"}
-    H -->|"Needs a decision"| E
-    H -->|"Needs clarification"| G
-    H -->|"Passed"| I["TICKETING<br/>to-tickets"]
-    I --> J{"Gate 4<br/>Execution readiness"}
-    J -->|"Needs clearer scope"| G
-    J -->|"Needs better slices"| I
-    J -->|"Passed"| K["READY_FOR_IMPLEMENTATION"]
+    D -->|"Passed"| E["Print handoff<br/>$wayfinder"]
+    E --> U2["Invoke specialist<br/>then resume $project-preflight"]
+    U2 --> F{"Gate 2–4<br/>repeat the same loop"}
+    F -->|"Missing evidence"| E
+    F -->|"All passed"| K["READY_FOR_IMPLEMENTATION"]
     K --> L["Separate authorization<br/>to implement the first ticket"]
 ```
 
@@ -32,11 +27,23 @@ flowchart TD
 | Stage | Specialist capability | Your role | Durable result | Exit condition |
 |---|---|---|---|---|
 | `IDEA` | Project Preflight | Provide the initial idea | Captured idea and state file | Idea pointer exists |
-| `DISCOVERY` | `grill-me` | Answer one focused product question at a time | Problem-clarity evidence | Gate 1 passes |
-| `DECISION` | `wayfinder` | Choose among options and trade-offs | Decision map or justified `not-required` | Gate 2 passes |
-| `SPECIFICATION` | `to-spec` | Confirm testing seams and review scope | Canonical spec | Gate 3 passes |
-| `TICKETING` | `to-tickets` | Review granularity and blocking edges | Approved tracer-bullet tickets | Gate 4 passes |
+| `DISCOVERY` | `grill-me` | Explicitly invoke it and answer one focused product question at a time | Problem-clarity evidence | Gate 1 passes |
+| `DECISION` | `wayfinder` | Explicitly invoke it and choose among options and trade-offs | Decision map or justified `not-required` | Gate 2 passes |
+| `SPECIFICATION` | `to-spec` | Explicitly invoke it, confirm testing seams, and review scope | Canonical spec | Gate 3 passes |
+| `TICKETING` | `to-tickets` | Explicitly invoke it and review granularity and blocking edges | Approved tracer-bullet tickets | Gate 4 passes |
 | `READY_FOR_IMPLEMENTATION` | Project Preflight | Decide whether to start coding | Precise implementation handoff | Preflight is complete |
+
+## The handoff loop
+
+Project Preflight does not secretly chain planning Skills. At every specialist Stage it:
+
+1. validates the current state and checks the required Skill in the active catalog;
+2. prints one exact command beginning with `Use $grill-me`, `Use $wayfinder`, `Use $to-spec`, or `Use $to-tickets`;
+3. stops so you can invoke that Skill explicitly;
+4. asks the upstream Skill to save or identify its durable result and then return you to `$project-preflight`;
+5. evaluates one Gate only after you resume.
+
+This visible pause is intentional. A Skill directory on disk is not proof that the current session can invoke it, and several upstream Skills require explicit user invocation.
 
 ## 0. Capture the idea and initialize state
 
@@ -67,7 +74,7 @@ It stores pointers rather than copying every artifact into one large file.
 
 ## 1. Discovery: make the problem clear
 
-Project Preflight routes `DISCOVERY` to `grill-me`. Expect a conversation, not an instant generated plan. Questions are asked one at a time and focus on decisions only you can make; discoverable repository facts should be inspected rather than asked back to you.
+At `DISCOVERY`, Project Preflight prints an exact `$grill-me` handoff and stops. You invoke it explicitly and later resume `$project-preflight`. Expect a conversation, not an instant generated plan. Questions are asked one at a time and focus on decisions only you can make; discoverable repository facts should be inspected rather than asked back to you.
 
 Discovery establishes:
 
@@ -85,7 +92,7 @@ Gate 1 passes only when durable evidence covers all of those fields. A polished 
 
 ## 2. Decisions: resolve architecture-reversing unknowns
 
-Project Preflight routes `DECISION` to `wayfinder`. Wayfinder names the destination, maps the known decision frontier, and resolves decision tickets rather than implementation tasks.
+At `DECISION`, Project Preflight prints an exact `$wayfinder` handoff and stops. You invoke it explicitly, let Wayfinder persist the decision map, and resume `$project-preflight`. Wayfinder names the destination, maps the known decision frontier, and resolves decision tickets rather than implementation tasks.
 
 Typical questions include:
 
@@ -103,7 +110,7 @@ Gate 2 passes when architecture-reversing choices have durable resolutions and a
 
 ## 3. Specification: freeze the approved project
 
-Project Preflight routes `SPECIFICATION` to `to-spec`. This stage synthesizes what has already been discussed; it does not reopen discovery or invent extra features. Before publishing the spec, you may be asked to confirm the highest useful testing seam.
+At `SPECIFICATION`, Project Preflight prints an exact `$to-spec` handoff and stops. You invoke it explicitly, save or link the canonical spec, and resume `$project-preflight`. This stage synthesizes what has already been discussed; it does not reopen discovery or invent extra features. Before publishing the spec, you may be asked to confirm the highest useful testing seam.
 
 The canonical spec normally covers:
 
@@ -121,7 +128,7 @@ Gate 3 passes when a reviewer can classify any proposed feature as in scope or o
 
 ## 4. Ticketing: create a safe execution frontier
 
-Project Preflight routes `TICKETING` to `to-tickets`. The capability first proposes a numbered breakdown and asks you to review:
+At `TICKETING`, Project Preflight prints an exact `$to-tickets` handoff and stops. You invoke it explicitly and resume `$project-preflight` after the ticket frontier is durable. The capability first proposes a numbered breakdown and asks you to review:
 
 - whether each ticket is too large or too small;
 - whether any tickets should be merged or split;
@@ -154,7 +161,7 @@ Follow the canonical spec and do not include later tickets.
 
 ## Control points and expected pauses
 
-Project Preflight does not autonomously cross several gates in one pass. A live interview may continue until its current question is resolved, but after a gate decision it gives you a reviewable status before routing onward.
+Project Preflight does not invoke an upstream Skill or autonomously cross several Gates in one run. Every specialist Stage ends with a user-invoked Handoff; every Gate evaluation begins only after an explicit return.
 
 At every checkpoint, expect four fields:
 
@@ -175,7 +182,7 @@ Because state lives in the repository, a later session can continue with:
 Use $project-preflight to resume this project's preflight.
 ```
 
-The agent validates `.project/preflight.md`, checks its artifact pointers, and resumes the earliest unsupported gate rather than replaying completed work.
+The agent validates `.project/preflight.md` through the State lifecycle module, checks its Artifact Evidence pointers, and resumes the earliest unsupported Gate rather than replaying completed work. Invalid candidate updates never replace the last valid file.
 
 ## Roll back when reality changes
 

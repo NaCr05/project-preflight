@@ -22,7 +22,7 @@ The current stage is the work now in progress. A passed gate advances immediatel
 
 ## Route stages
 
-| Current stage | Capability to load | Durable result |
+| Current stage | Explicit user handoff | Durable result |
 |---|---|---|
 | `IDEA` | Project Preflight | Captured idea pointer |
 | `DISCOVERY` | `grill-me` | Evidence for Gate 1 |
@@ -31,7 +31,15 @@ The current stage is the work now in progress. A passed gate advances immediatel
 | `TICKETING` | `to-tickets` | Ticket-set pointer and first frontier ticket |
 | `READY_FOR_IMPLEMENTATION` | None | Implementation handoff |
 
-Load the current installed version of the named Skill. Do not embed a frozen copy of its behavior here.
+Project Preflight never invokes the named Skill internally. It prints an exact `$skill-name` instruction, stops, and waits for the user to invoke that Skill. After the upstream work has a durable result, the instruction sends the user back to `$project-preflight` for Gate evaluation. Do not embed a frozen copy of upstream behavior here.
+
+Generate the instruction with:
+
+```text
+python scripts/preflight_state.py handoff
+```
+
+The handoff must name the upstream Skill, the bounded purpose, the production-code guardrail, and the explicit return to `$project-preflight`.
 
 ## Detect the stage
 
@@ -53,7 +61,7 @@ Advance only through these forward transitions:
 - `SPECIFICATION` → `TICKETING`
 - `TICKETING` → `READY_FOR_IMPLEMENTATION`
 
-Update the gate, stage, previous stage, timestamp, reason, artifact pointers, and evidence in one change. Run the validator immediately afterward.
+Use `scripts/preflight_state.py advance` to update the Gate, Stage, previous Stage, timestamp, reason, artifact pointers, and evidence in one validated atomic change. Do not edit the frontmatter directly.
 
 ## Regress
 
@@ -64,21 +72,21 @@ Regress to the earliest stage affected by new evidence. Allowed regression targe
 - from `TICKETING`: `SPECIFICATION`, `DECISION`, or `DISCOVERY`;
 - from `READY_FOR_IMPLEMENTATION`: `TICKETING`, `SPECIFICATION`, `DECISION`, or `DISCOVERY`.
 
-Mark the gate that would advance from the target stage as `invalidated`. Mark later passed gates `invalidated` as well. Keep old artifacts as historical evidence, but do not treat them as current authority until the affected gates pass again.
+Use `scripts/preflight_state.py regress`. It marks the Gate that would advance from the target Stage and all later Gates `invalidated` in one validated atomic change. Keep old artifacts as historical evidence, but do not treat them as current authority until the affected Gates pass again.
 
 ## Control each cycle
 
 Use this order:
 
 1. **Detect** the earliest unresolved stage.
-2. **Check** the stage dependency and tracker authorization.
-3. **Route** to one upstream capability.
-4. **Evaluate** one gate using durable evidence.
-5. **Persist** state and artifact pointers.
-6. **Validate** the state file.
-7. **Report** current stage, evidence, blockers, and next action.
+2. **Check** the Stage dependency in the active catalog and check tracker authorization.
+3. **Handoff** one exact user-invoked upstream Skill instruction, then stop.
+4. **Resume** only after the user explicitly invokes `$project-preflight` again.
+5. **Evaluate** one Gate using the returned durable evidence.
+6. **Persist** state and artifact pointers through the State lifecycle interface.
+7. **Report** current Stage, evidence, blockers, and the next handoff or terminal implementation handoff.
 
-Do not autonomously cross multiple gates in one pass. This preserves human review and prevents a plausible-looking chain of unsupported conclusions.
+Do not invoke an upstream Skill and do not autonomously cross multiple Gates in one run. The visible handoff preserves human control and prevents a plausible-looking chain of unsupported conclusions.
 
 ## Guard implementation
 

@@ -1,7 +1,9 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 import re
+import sys
 import unittest
 from pathlib import Path
 
@@ -13,6 +15,13 @@ SPEC = importlib.util.spec_from_file_location("validate_preflight_contract", SCR
 assert SPEC and SPEC.loader
 VALIDATOR = importlib.util.module_from_spec(SPEC)
 SPEC.loader.exec_module(VALIDATOR)
+if str(SCRIPT.parent) not in sys.path:
+    sys.path.insert(0, str(SCRIPT.parent))
+
+from preflight_runtime._contract import (  # noqa: E402
+    ALLOWED_STAGES,
+    DIRECT_DEPENDENCIES,
+)
 
 
 class RepositoryContractTests(unittest.TestCase):
@@ -67,6 +76,30 @@ class RepositoryContractTests(unittest.TestCase):
     def test_openai_default_prompt_invokes_skill_explicitly(self):
         metadata = (SKILL_ROOT / "agents" / "openai.yaml").read_text(encoding="utf-8")
         self.assertIn("$project-preflight", metadata)
+
+    def test_runtime_docs_are_synchronized_with_canonical_stage_registry(self):
+        workflow = (SKILL_ROOT / "references" / "workflow.md").read_text(encoding="utf-8")
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        for stage in ALLOWED_STAGES:
+            self.assertIn(stage, workflow)
+        for stage, dependency in DIRECT_DEPENDENCIES.items():
+            self.assertIn(stage, skill)
+            self.assertIn(f"`{dependency}`", skill)
+        self.assertIn("Do not invoke or imitate the upstream Skill", skill)
+        self.assertIn("preflight_state.py handoff", workflow)
+
+    def test_behavior_eval_manifest_is_canonical_and_complete(self):
+        manifest = json.loads((REPO_ROOT / "evals" / "cases.json").read_text(encoding="utf-8"))
+        self.assertEqual(1, manifest["schema_version"])
+        self.assertEqual(7, len(manifest["rubric"]))
+        self.assertEqual(5, len(manifest["cases"]))
+        self.assertEqual(5, len({case["id"] for case in manifest["cases"]}))
+
+    def test_handoff_architecture_decision_and_domain_language_exist(self):
+        self.assertTrue((REPO_ROOT / "CONTEXT.md").is_file())
+        self.assertTrue(
+            (REPO_ROOT / "docs" / "decisions" / "0002-explicit-handoff-and-state-lifecycle.md").is_file()
+        )
 
 
 if __name__ == "__main__":

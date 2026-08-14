@@ -17,7 +17,9 @@ Use exactly one project-scoped state file:
 .project/preflight.md
 ```
 
-Create it from `assets/preflight-template.md`. YAML frontmatter is canonical for finite state; the Markdown body is canonical for explanations, evidence summaries, blockers, and the next action. Do not maintain a parallel status file.
+Create and mutate it through `scripts/preflight_state.py`. YAML frontmatter is canonical for finite state; the Markdown body is canonical for explanations, evidence summaries, blockers, and the next action. Do not maintain a parallel status file or hand-edit the frontmatter.
+
+`scripts/preflight_runtime/_contract.py` is canonical for finite Stage, Gate, artifact, dependency, transition, and handoff mappings. `assets/preflight-template.md` is derived from that registry and must match `preflight_state.py template --check`.
 
 ## Frontmatter schema
 
@@ -53,6 +55,8 @@ dependencies:
 
 Allowed stages are `IDEA`, `DISCOVERY`, `DECISION`, `SPECIFICATION`, `TICKETING`, and `READY_FOR_IMPLEMENTATION`.
 
+The `gates`, `artifacts`, and `dependencies` maps must contain exactly the keys shown. The State lifecycle module renders them in canonical registry order, while validation remains compatible with an existing v0.1 file whose mapping keys use a different order.
+
 ## Artifact pointers
 
 Each artifact value is one of:
@@ -65,7 +69,16 @@ Each artifact value is one of:
 
 Do not place artifact content in frontmatter. Do not use absolute local paths because another contributor or CI run cannot resolve them.
 
-Local pointers required for the current stage must exist. A URL proves location, not semantic sufficiency; the gate still requires accessible evidence.
+Artifact Evidence is checked through one adapter seam:
+
+| Pointer | Adapter behavior |
+|---|---|
+| `inline:#anchor` | Verify that the state body contains the anchor and required content. |
+| Repository-relative path | Verify containment, existence, readability, and a Markdown anchor when supplied. |
+| GitHub Issue URL | Verify Issue syntax; with `--check-remote`, query the GitHub Issue record. |
+| Other HTTP(S) URL | Report that semantic sufficiency is unverified; with `--check-remote`, also check accessibility. |
+
+Local pointers required for the current Stage must exist. A reachable URL proves location and accessibility, not semantic sufficiency; the Gate still requires human review of the evidence. Remote checking is read-only, rejects localhost and non-public network targets, and may use `GH_TOKEN` or `GITHUB_TOKEN` without storing either value.
 
 ## Stage invariants
 
@@ -111,12 +124,12 @@ The Original Idea section may be the canonical idea through `inline:#original-id
 
 ## Write and recovery rules
 
-1. Read and validate the current file.
+1. Read and validate the current file through the State lifecycle interface.
 2. Gather new evidence.
-3. Compute the complete next state.
-4. Write frontmatter and body in one change.
-5. Run `scripts/validate_preflight.py`.
-6. If validation fails, repair the state before any further routing.
+3. Build one `record`, `advance`, or `regress` operation.
+4. Let the module compute and validate the complete candidate state.
+5. Let the module atomically replace the old state only after validation passes.
+6. If an operation fails, keep the last valid file unchanged. Use `recover --source <valid-state>` only with an explicitly chosen valid recovery source.
 
 Never delete historical upstream artifacts during regression. Change their authority by invalidating the relevant gate and updating pointers only when a replacement becomes canonical.
 
