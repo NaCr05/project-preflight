@@ -2,116 +2,87 @@
 
 **English** | [简体中文](README.zh-CN.md)
 
-> A gated pre-coding workflow orchestrator for AI coding agents.
+> One invocation turns a rough software idea into an evidence-backed, implementation-ready plan.
 
-`project-preflight` turns a vague software idea—or a partially planned project—into an evidence-backed implementation handoff. It detects the current stage, routes work through compatible planning Skills, persists progress across sessions, and stops production coding until the project is demonstrably ready.
+Project Preflight is a Codex Plugin with one public entry: `$project-preflight`. It automatically coordinates discovery, architecture decisions, specification, and ticketing. You never copy a generated Skill command; you only answer questions and confirm choices.
 
-## How it works
+## The experience
 
 ```mermaid
 flowchart LR
-    A["Vague idea"] --> B["Discovery<br/>grill-me"]
-    B -->|"Gate 1"| C["Decisions<br/>wayfinder"]
-    C -->|"Gate 2"| D["Specification<br/>to-spec"]
-    D -->|"Gate 3"| E["Tickets<br/>to-tickets"]
-    E -->|"Gate 4"| F["READY_FOR_IMPLEMENTATION"]
+    A["Your rough paragraph"] --> P["$project-preflight once"]
+    P --> G["Discovery<br/>grill-me"]
+    G --> W["Decisions<br/>wayfinder"]
+    W --> S["Specification<br/>to-spec"]
+    S --> T["Tickets<br/>to-tickets"]
+    T --> R["READY_FOR_IMPLEMENTATION"]
 ```
 
-Project Preflight advances one evidence-backed gate at a time. You remain responsible for product and architecture decisions; Codex interviews, maps decisions, synthesizes the approved spec, and proposes a reviewable ticket frontier. The endpoint is an implementation handoff—not completed product code.
-
-**[Read the complete workflow guide →](docs/workflow.md)**
-
-## Why this exists
-
-Planning Skills are useful individually, but a project can still skip a step, lose state between sessions, duplicate decisions across documents, or treat the existence of a spec as proof of readiness. Project Preflight supplies the missing lifecycle:
-
-- stage detection and resumption;
-- evidence-based gates;
-- tracker-agnostic artifact pointers;
-- scope and implementation guardrails;
-- rollback when a technical assumption fails;
-- a precise `READY_FOR_IMPLEMENTATION` handoff.
-
-It orchestrates rather than replaces:
-
-- `grill-me` for discovery;
-- `wayfinder` for unresolved decisions;
-- `to-spec` for specification synthesis;
-- `to-tickets` for tracer-bullet tickets.
-
-Those Skills are not bundled with this repository and retain their own behavior and licensing.
-
-## Install locally
-
-Copy `skills/project-preflight` into your Codex Skills directory as `project-preflight`. For example, place it under:
+At each Stage, Project Preflight tells you which capability it is using. The short label is the familiar capability name; execution stays inside the namespaced Plugin adapter:
 
 ```text
-<CODEX_HOME>/skills/project-preflight
+Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight 内置适配器）。你只需回答或确认。
 ```
 
-Install the four upstream Skills separately. Project Preflight checks stage dependencies before routing and stops with a useful blocker when one is unavailable.
+The specialist Skill returns to Project Preflight automatically after saving durable evidence. Project Preflight checks the Gate, updates `.project/preflight.md` atomically, announces the next Skill, and continues. It pauses only for your answer, a real blocker, cancellation, or readiness.
 
-## Use it
+**[Read the complete workflow →](docs/workflow.md)**
 
-Start from an idea:
+## Four Gates
 
-```text
-Use $project-preflight. I want to build an open-source agent that ...
-```
-
-Resume later:
-
-```text
-Use $project-preflight to resume this project's preflight.
-```
-
-Audit an existing plan:
-
-```text
-Use $project-preflight to determine whether this spec and ticket set are ready for implementation.
-```
-
-The Skill maintains one canonical state file in the target project:
-
-```text
-.project/preflight.md
-```
-
-The file records stage, gate status, blockers, and pointers to the canonical idea, decision map, spec, and ticket set. It does not duplicate those artifacts.
-
-## Readiness gates
-
-1. **Problem clarity** — user, problem, value, input, output, MVP, non-goals, and measurable success are clear.
+1. **Problem clarity** — user, problem, value, inputs, outputs, MVP, non-goals, assumptions, and measurable success are clear.
 2. **Decision readiness** — architecture-reversing unknowns and feasibility risks are resolved or explicitly non-blocking.
-3. **Specification readiness** — scope, behavior, testing decisions, and open questions are precise enough to judge every proposed feature.
-4. **Execution readiness** — tickets are vertical, testable, correctly blocked, scope-preserving, and include a first tracer bullet.
+3. **Specification readiness** — scope, behavior, boundaries, and verification are buildable and unambiguous.
+4. **Execution readiness** — tickets are vertical, testable, correctly blocked, and begin with a tracer bullet.
 
-Only Gate 4 produces `READY_FOR_IMPLEMENTATION`.
+Only Gate 4 produces `READY_FOR_IMPLEMENTATION`. Preflight ends with the canonical spec, approved tickets, first unblocked tracer bullet, verification path, and residual risks—not production code.
 
-## Repository layout
+## Plugin architecture
 
-- `skills/project-preflight/` — the distributable Skill.
-- `docs/product-spec.md` — v0.1 product scope and success criteria.
-- `docs/workflow.md` — complete user journey, gates, artifacts, pauses, and rollback behavior.
-- `docs/decisions/` — append-only architectural rationale.
-- `tests/` — deterministic state-contract tests.
-- `evals/` — realistic behavioral cases and dated forward-test evidence.
+- `skills/project-preflight/` — the single user-facing orchestrator and state runtime.
+- `skills/project-preflight-grill-me/` — bundled discovery adapter.
+- `skills/project-preflight-wayfinder/` — bundled decision adapter.
+- `skills/project-preflight-to-spec/` — bundled specification adapter.
+- `skills/project-preflight-to-tickets/` — bundled ticketing adapter.
+- `.codex-plugin/plugin.json` — Codex Plugin manifest.
+- `docs/decisions/0003-single-entry-automatic-orchestration-plugin.md` — current architecture decision.
+
+The adapters are namespaced to avoid collisions with separately installed Skills. See [third-party notices](THIRD_PARTY_NOTICES.md) for upstream inspiration and attribution.
+
+## Use
+
+```text
+Use $project-preflight. I want to build an open-source tool that ...
+```
+
+For an existing project:
+
+```text
+Use $project-preflight to audit this project and continue from the earliest unsupported Gate.
+```
+
+The first message can be one immature sentence. Project Preflight does not expect a plan.
+
+## State and safety
+
+`.project/preflight.md` stores the Stage, Gate status, blockers, and pointers to canonical artifacts. Parsing, transitions, regression, validation, recovery, and atomic persistence share one State lifecycle interface. Remote artifact pointers are explicit evidence-adapter results; they are not silently treated as verified.
+
+No production implementation is allowed before readiness. If new evidence invalidates a decision, Project Preflight regresses to the earliest affected Stage and automatically resumes the corresponding Skill while preserving later artifacts as history.
 
 ## Validate changes
 
-The validator uses only the Python standard library:
-
 ```text
 python -m unittest discover -s tests -v
-python skills/project-preflight/scripts/validate_preflight.py tests/fixtures/valid-idea.md --repo-root tests/fixtures
+python skills/project-preflight/scripts/preflight_state.py template --check skills/project-preflight/assets/preflight-template.md
+python evals/run_behavior_evals.py list
 ```
 
-Run the Skill Creator `quick_validate.py` against `skills/project-preflight` to validate packaging metadata.
+Also run the Codex Plugin validator on the repository root and Skill Creator validation on each directory under `skills/`.
 
-## Status
+## Branch history
 
-This repository currently targets a small, reviewable v0.1 contract: local Markdown state, optional remote tracker pointers, explicit upstream dependencies, and deterministic readiness validation. A self-hosted local happy path has reached validated `READY_FOR_IMPLEMENTATION`; live remote-tracker publication and automatic dependency installation are intentionally deferred.
+The validated explicit-Handoff experiment remains preserved on `agent/handoff-state-lifecycle`. This branch replaces only its orchestration UX; the proven State lifecycle, evidence adapters, regression, and eval architecture remain.
 
 ## License
 
-MIT. See `LICENSE`.
+MIT. See [LICENSE](LICENSE).

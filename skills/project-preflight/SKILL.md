@@ -1,62 +1,62 @@
 ---
 name: project-preflight
-description: Orchestrate the pre-coding lifecycle for a new or existing software project, especially an AI or agent project. Use when a user has a vague project idea, wants to resume interrupted planning, needs to determine whether a project is ready to implement, or already has decisions, a spec, or tickets that must be assessed and routed through grill-me, wayfinder, to-spec, and to-tickets. Persist stage and evidence in .project/preflight.md, enforce planning gates, and prevent production implementation before READY_FOR_IMPLEMENTATION.
+description: Single-entry pre-coding orchestrator for a new or existing software project, especially an AI or agent project. Use when a user has a rough idea, wants to resume planning, or needs to determine implementation readiness. Automatically coordinate bundled grill-me, wayfinder, to-spec, and to-tickets stage adapters; persist evidence in .project/preflight.md; show which Skill is active; and prevent production implementation before READY_FOR_IMPLEMENTATION.
 ---
 
 # Project Preflight
 
-Turn project context into an evidence-backed implementation handoff. Orchestrate installed planning skills; do not reproduce their interviews, decision work, specification synthesis, or ticket generation.
+Own the pre-coding conversation from one `$project-preflight` invocation until user input, a genuine blocker, explicit cancellation, or `READY_FOR_IMPLEMENTATION`. The user answers questions and confirms decisions; never ask them to invoke another Skill or copy a prompt.
 
 ## Load the contracts
 
-Read these files before acting:
+Read, in order:
 
-1. [references/workflow.md](references/workflow.md) for states, transitions, routing, and rollback.
-2. [references/artifact-contract.md](references/artifact-contract.md) for the canonical state file and artifact pointers.
-3. [references/dependency-contract.md](references/dependency-contract.md) before routing to another skill or tracker.
-4. [references/gates.md](references/gates.md) when evaluating or invalidating a gate.
+1. [references/workflow.md](references/workflow.md) for stages, transitions, and rollback.
+2. [references/orchestration-contract.md](references/orchestration-contract.md) for automatic adapter routing and Skill visibility.
+3. [references/artifact-contract.md](references/artifact-contract.md) for canonical evidence.
+4. [references/dependency-contract.md](references/dependency-contract.md) for bundled adapter availability and tracker authorization.
+5. [references/gates.md](references/gates.md) when evaluating or invalidating a Gate.
 
-Respect repository instructions before these contracts. If a repository rule conflicts with this skill, stop and identify the conflict instead of silently choosing one.
+Respect repository instructions. Stop and surface an actual conflict instead of silently choosing one.
 
-## Run one controlled cycle
+## Use the runtime seam
 
-1. Inspect the repository and conversation without modifying production code.
-2. Read `.project/preflight.md` when it exists. Validate it with `scripts/validate_preflight.py` before trusting its stage.
-3. If state is absent, reconstruct the highest defensible stage from existing evidence. Create the state file from `assets/preflight-template.md` only when the user's request authorizes project changes.
-4. Check only the dependencies needed for the selected stage. Do not assume that a named skill or remote tracker is available.
-5. Select the earliest gate that is not supported by evidence. Do not skip it merely because a later artifact exists.
-6. Load and follow the installed stage skill:
-   - `DISCOVERY` -> `grill-me`
-   - `DECISION` -> `wayfinder`
-   - `SPECIFICATION` -> `to-spec`
-   - `TICKETING` -> `to-tickets`
-7. Evaluate the stage gate from repository or tracker evidence. A conversation claim alone is not enough when a durable artifact should exist.
-8. Update `.project/preflight.md` atomically after meaningful progress. Record artifact pointers rather than copying upstream artifacts into the state file.
-9. Run the validator after every state update. Do not advance when validation fails.
-10. Report the current stage, gate evidence, blockers, changed artifact pointers, and one next action.
+Use `scripts/preflight_state.py` for every state mutation; never hand-edit YAML frontmatter.
 
-## Enforce the guardrail
+- `init` captures the rough idea and enters `DISCOVERY`.
+- `record` updates evidence, blockers, pointers, or dependency observations.
+- `advance` crosses exactly one evidence-backed forward transition.
+- `regress` invalidates affected Gates and returns to the earliest affected Stage.
+- `recover` atomically restores an explicitly supplied valid state.
+- `directive` returns the authoritative automatic stage action and user-facing Skill banner.
 
-Before `READY_FOR_IMPLEMENTATION`, do not implement production features, initialize an application stack, or make speculative architecture changes. Permit a throwaway prototype only when `wayfinder` identifies it as evidence needed to resolve a decision; label it as disposable and keep it outside production paths.
+Candidate state is validated before atomic replacement. A failed operation leaves the last valid state unchanged.
 
-Do not advance more than one gate in a single autonomous pass. Continue a live interview as required, but give the user a reviewable gate decision before routing to the next stage.
+## Run the automatic loop
 
-When adopting an existing project, reconstruct and evaluate earlier gates instead of assuming that an existing spec or ticket set proves readiness.
+1. Inspect project context without implementing production code. Validate existing state or initialize it from the user's rough paragraph.
+2. Run `directive`. Show its `announcement` before stage work so the user always knows which capability is active.
+3. For `RUN_STAGE_ADAPTER`, read and follow the bundled adapter at `../<adapter_skill>/SKILL.md`. Do this yourself; do not delegate invocation to the user.
+4. Keep one-question-at-a-time interaction where the adapter requires it. Persist its durable artifact or pointer.
+5. Return control to this orchestrator automatically, evaluate the current Gate, and use `advance` once when the evidence passes.
+6. Immediately run `directive` again. Announce the next Skill and continue until a user answer is required, a blocker exists, or readiness is reached.
+7. On resumed conversations, validate state, show the active Skill banner again, and continue the same loop.
 
-## Handle invalidation
+Stage routing is canonical:
 
-Regress to the earliest affected stage when new evidence invalidates a gate. Mark the affected gate `invalidated`, retain the durable rationale, and leave later artifacts in place as historical evidence unless the user asks to remove them. Treat them as non-authoritative until their gates pass again.
+- `DISCOVERY` -> `project-preflight-grill-me` (shown to the user as `grill-me`)
+- `DECISION` -> `project-preflight-wayfinder` (shown as `wayfinder`)
+- `SPECIFICATION` -> `project-preflight-to-spec` (shown as `to-spec`)
+- `TICKETING` -> `project-preflight-to-tickets` (shown as `to-tickets`)
 
-If a dependency is missing, a tracker write is unauthorized, or evidence is contradictory, remain at the current stage and record a blocker. Never imitate a missing upstream skill or publish externally without authorization.
+Do not pretend that Python invokes a Skill. The runtime chooses the stage and renders the directive; the Codex orchestrator loads and follows the bundled Skill instructions.
 
-## Hand off implementation
+## Guardrails and invalidation
 
-Set `READY_FOR_IMPLEMENTATION` only after all four gates pass and the state validates. The handoff must name:
+Before readiness, do not implement production features, initialize an application stack, or make speculative architecture changes. A disposable prototype is allowed only when the decision adapter identifies it as necessary evidence and it stays outside production paths.
 
-- the canonical spec;
-- the approved ticket set;
-- the first unblocked tracer-bullet ticket;
-- the commands or evaluations that will verify it;
-- any non-blocking residual risks.
+If new evidence invalidates a Gate, regress to the earliest affected Stage, preserve later artifacts as non-authoritative history, show the newly active Skill, and continue from there. If a bundled adapter is unavailable, a tracker write lacks authorization, or evidence conflicts, remain at the current Stage and record a blocker.
 
-End the preflight there. Begin implementation only in response to a separate implementation request or an already explicit instruction to continue after readiness.
+## Finish at readiness
+
+Set `READY_FOR_IMPLEMENTATION` only after all four Gates pass and state validates. Present the canonical spec, approved ticket set, first unblocked tracer bullet, verification commands or evaluations, and residual non-blocking risks. End preflight there; implementation needs a separate or already explicit instruction.

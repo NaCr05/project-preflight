@@ -1,0 +1,99 @@
+{
+  "schema_version": 1,
+  "rubric": [
+    "correct_stage_selection",
+    "correct_dependency_behavior",
+    "gate_evidence_respected",
+    "artifact_authority_preserved",
+    "production_guardrail_respected",
+    "state_contract_conforms",
+    "one_clear_next_action",
+    "visible_skill_announcement"
+  ],
+  "cases": [
+    {
+      "id": "vague-idea",
+      "title": "Vague agent idea",
+      "prompt": "Use $project-preflight. I want to build an open-source agent that watches technical creators and tells me what matters.",
+      "fixture": null,
+      "active_skills": ["project-preflight", "project-preflight-grill-me"],
+      "expected": {
+        "current_stage": "DISCOVERY",
+        "gates": {"gate_1": "not_evaluated", "gate_2": "not_evaluated", "gate_3": "not_evaluated", "gate_4": "not_evaluated"},
+        "dependencies": {"grill-me": "available"},
+        "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "grill-me", "adapter_skill": "project-preflight-grill-me"},
+        "artifacts": {"idea": "inline:#original-idea"},
+        "required_paths": [],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "blocked-decision",
+      "title": "Resume a blocked decision",
+      "prompt": "Use $project-preflight to resume this project.",
+      "fixture": "fixtures/blocked-decision",
+      "active_skills": ["project-preflight", "project-preflight-wayfinder"],
+      "expected": {
+        "current_stage": "DECISION",
+        "gates": {"gate_1": "passed", "gate_2": "blocked"},
+        "dependencies": {"wayfinder": "available"},
+        "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "wayfinder", "adapter_skill": "project-preflight-wayfinder"},
+        "artifacts": {"idea": "inline:#original-idea"},
+        "required_paths": [],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "existing-spec-missing-discovery",
+      "title": "Existing spec with missing discovery evidence",
+      "prompt": "Use $project-preflight to audit whether this project is ready. A spec and tickets already exist.",
+      "fixture": "fixtures/existing-spec-missing-discovery",
+      "active_skills": ["project-preflight", "project-preflight-grill-me"],
+      "expected": {
+        "current_stage": "DISCOVERY",
+        "gates": {"gate_1": "not_evaluated", "gate_2": "not_evaluated", "gate_3": "not_evaluated", "gate_4": "not_evaluated"},
+        "dependencies": {"grill-me": "available"},
+        "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "grill-me", "adapter_skill": "project-preflight-grill-me"},
+        "required_paths": ["docs/spec.md", "tickets/01-existing-ticket.md"],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "missing-stage-skill",
+      "title": "Missing ticketing Skill",
+      "prompt": "Use $project-preflight to continue ticketing this approved spec.",
+      "fixture": "fixtures/missing-stage-skill",
+      "active_skills": ["project-preflight"],
+      "expected": {
+        "current_stage": "TICKETING",
+        "gates": {"gate_1": "passed", "gate_2": "passed", "gate_3": "passed", "gate_4": "not_evaluated"},
+        "dependencies": {"to-tickets": "missing"},
+        "directive": {"kind": "BLOCKED", "display_skill": "to-tickets", "adapter_skill": "project-preflight-to-tickets"},
+        "artifacts": {"spec": "docs/spec.md"},
+        "required_paths": ["docs/spec.md"],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "ready-invalidated",
+      "title": "Ready project invalidated by implementation evidence",
+      "prompt": "Use $project-preflight. The chosen API cannot return the required data under its current plan; reassess readiness.",
+      "fixture": "fixtures/ready-invalidated",
+      "active_skills": ["project-preflight", "project-preflight-wayfinder"],
+      "expected": {
+        "current_stage": "DECISION",
+        "gates": {"gate_1": "passed", "gate_2": "invalidated", "gate_3": "invalidated", "gate_4": "invalidated"},
+        "dependencies": {"wayfinder": "available"},
+        "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "wayfinder", "adapter_skill": "project-preflight-wayfinder"},
+        "artifacts": {"spec": "docs/spec.md", "tickets": "tickets"},
+        "required_paths": ["docs/spec.md", "tickets/01-tracer.md"],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    }
+  ]
+}

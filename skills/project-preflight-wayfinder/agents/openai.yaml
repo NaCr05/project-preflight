@@ -1,0 +1,6 @@
+interface:
+  display_name: "Preflight Decision Adapter"
+  short_description: "Internal decision mapping for Project Preflight"
+  default_prompt: "Use $project-preflight-wayfinder only as the DECISION adapter selected by $project-preflight."
+policy:
+  allow_implicit_invocation: true

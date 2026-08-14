@@ -1,0 +1,6 @@
+interface:
+  display_name: "Preflight Specification Adapter"
+  short_description: "Internal specification synthesis for Project Preflight"
+  default_prompt: "Use $project-preflight-to-spec only as the SPECIFICATION adapter selected by $project-preflight."
+policy:
+  allow_implicit_invocation: true

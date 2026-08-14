@@ -1,87 +1,42 @@
-# Workflow Contract
+# Workflow contract
 
-## State model
-
-Use exactly one current stage:
+## Canonical state machine
 
 ```text
 IDEA
-  ↓ capture a durable idea
-DISCOVERY
-  ↓ Gate 1: problem clarity
-DECISION
-  ↓ Gate 2: decision readiness
-SPECIFICATION
-  ↓ Gate 3: specification readiness
-TICKETING
-  ↓ Gate 4: execution readiness
-READY_FOR_IMPLEMENTATION
+  -> DISCOVERY
+  -> DECISION       (Gate 1 passed)
+  -> SPECIFICATION  (Gate 2 passed)
+  -> TICKETING      (Gate 3 passed)
+  -> READY_FOR_IMPLEMENTATION (Gate 4 passed)
 ```
 
-The current stage is the work now in progress. A passed gate advances immediately and atomically to the next stage.
+`DISCOVERY`, `DECISION`, `SPECIFICATION`, and `TICKETING` each run through a bundled stage adapter selected automatically by `preflight_state.py directive`. The user invokes `$project-preflight` once and then only answers or confirms.
 
-## Route stages
+| Current Stage | Bundled adapter | Public Skill label | Durable result |
+|---|---|---|---|
+| `IDEA` | None | Project Preflight | Rough idea captured |
+| `DISCOVERY` | `project-preflight-grill-me` | `grill-me` | Canonical idea/discovery evidence |
+| `DECISION` | `project-preflight-wayfinder` | `wayfinder` | Decision map |
+| `SPECIFICATION` | `project-preflight-to-spec` | `to-spec` | Canonical spec |
+| `TICKETING` | `project-preflight-to-tickets` | `to-tickets` | Ticket frontier |
+| `READY_FOR_IMPLEMENTATION` | None | Project Preflight | Implementation handoff |
 
-| Current stage | Capability to load | Durable result |
-|---|---|---|
-| `IDEA` | Project Preflight | Captured idea pointer |
-| `DISCOVERY` | `grill-me` | Evidence for Gate 1 |
-| `DECISION` | `wayfinder` | Decision-map pointer or `not-required` |
-| `SPECIFICATION` | `to-spec` | Specification pointer |
-| `TICKETING` | `to-tickets` | Ticket-set pointer and first frontier ticket |
-| `READY_FOR_IMPLEMENTATION` | None | Implementation handoff |
+## Controlled loop
 
-Load the current installed version of the named Skill. Do not embed a frozen copy of its behavior here.
+1. Validate or reconstruct the earliest defensible Stage.
+2. Derive the current orchestration directive.
+3. Show the user-visible Skill banner.
+4. Follow the bundled adapter until it needs one user answer or produces its durable result.
+5. Evaluate the current Gate; persist evidence and cross at most one transition per mutation.
+6. Derive the next directive and continue automatically.
 
-## Detect the stage
+The conversation may cross multiple Gates without requiring a new `$project-preflight` invocation, but every Gate is still a separate validated state transition. Stop only for user input, missing authority/capability, contradictory evidence, explicit cancellation, or readiness.
 
-1. Validate existing state before trusting it.
-2. Inventory repository and tracker evidence.
-3. Find the earliest gate without sufficient evidence.
-4. Set the current stage to the work immediately before that gate.
-5. If all gates have evidence, verify pointers and readiness invariants before declaring readiness.
+## Regression
 
-The presence of a later artifact does not waive earlier gates. An existing project may be adopted at a later stage only after earlier gates are reconstructed and passed from evidence.
+New evidence returns the project to the earliest affected Stage. All later Gates become `invalidated`; later artifacts remain as non-authoritative history. The next directive announces the adapter for the regression target and resumes from there.
 
-## Advance
+## Guardrail
 
-Advance only through these forward transitions:
-
-- `IDEA` → `DISCOVERY`
-- `DISCOVERY` → `DECISION`
-- `DECISION` → `SPECIFICATION`
-- `SPECIFICATION` → `TICKETING`
-- `TICKETING` → `READY_FOR_IMPLEMENTATION`
-
-Update the gate, stage, previous stage, timestamp, reason, artifact pointers, and evidence in one change. Run the validator immediately afterward.
-
-## Regress
-
-Regress to the earliest stage affected by new evidence. Allowed regression targets are:
-
-- from `DECISION`: `DISCOVERY`;
-- from `SPECIFICATION`: `DECISION` or `DISCOVERY`;
-- from `TICKETING`: `SPECIFICATION`, `DECISION`, or `DISCOVERY`;
-- from `READY_FOR_IMPLEMENTATION`: `TICKETING`, `SPECIFICATION`, `DECISION`, or `DISCOVERY`.
-
-Mark the gate that would advance from the target stage as `invalidated`. Mark later passed gates `invalidated` as well. Keep old artifacts as historical evidence, but do not treat them as current authority until the affected gates pass again.
-
-## Control each cycle
-
-Use this order:
-
-1. **Detect** the earliest unresolved stage.
-2. **Check** the stage dependency and tracker authorization.
-3. **Route** to one upstream capability.
-4. **Evaluate** one gate using durable evidence.
-5. **Persist** state and artifact pointers.
-6. **Validate** the state file.
-7. **Report** current stage, evidence, blockers, and next action.
-
-Do not autonomously cross multiple gates in one pass. This preserves human review and prevents a plausible-looking chain of unsupported conclusions.
-
-## Guard implementation
-
-Before readiness, permit only planning, research, evaluation, or a disposable prototype explicitly required to resolve a decision. Do not initialize or modify production application code as speculative momentum.
-
-At readiness, hand off the canonical spec, ticket set, first unblocked tracer bullet, verification path, and residual risks. Starting implementation remains a separate action.
+No production implementation before `READY_FOR_IMPLEMENTATION`. Planning artifacts, evidence research, and explicitly disposable decision prototypes are allowed.

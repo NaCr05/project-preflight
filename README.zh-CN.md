@@ -2,116 +2,87 @@
 
 [English](README.md) | **简体中文**
 
-> 面向 AI 编码智能体、带阶段闸门的编码前工作流编排器。
+> 只调用一次，把一段模糊的软件想法推进成有证据、可实施的计划。
 
-`project-preflight` 将一个模糊的软件想法或尚未完成规划的项目，推进为一份有证据支撑的实施交接。它会识别项目当前所处阶段，将工作路由到兼容的规划 Skill，跨会话保存进度，并在项目被证明已经准备就绪之前阻止生产代码开发。
+Project Preflight 是一个只有一个公开入口的 Codex Plugin：`$project-preflight`。它会自动协调需求澄清、架构决策、规范生成和任务拆分。你不需要复制任何 Skill 指令，只需要回答问题和确认选择。
 
-## 工作流程
+## 实际体验
 
 ```mermaid
 flowchart LR
-    A["模糊想法"] --> B["需求探索<br/>grill-me"]
-    B -->|"Gate 1"| C["关键决策<br/>wayfinder"]
-    C -->|"Gate 2"| D["正式规格<br/>to-spec"]
-    D -->|"Gate 3"| E["执行任务<br/>to-tickets"]
-    E -->|"Gate 4"| F["READY_FOR_IMPLEMENTATION"]
+    A["你的一段模糊想法"] --> P["只调用一次<br/>$project-preflight"]
+    P --> G["需求澄清<br/>grill-me"]
+    G --> W["关键决策<br/>wayfinder"]
+    W --> S["项目规范<br/>to-spec"]
+    S --> T["执行任务<br/>to-tickets"]
+    T --> R["READY_FOR_IMPLEMENTATION"]
 ```
 
-Project Preflight 每次只推进一个有证据支持的 Gate。你仍然负责产品和架构判断；Codex 负责采访、绘制决策地图、综合已批准的 Spec，并提出可审查的 Ticket Frontier。终点是可靠的实施交接，而不是已经写完的产品代码。
-
-**[查看完整中文流程指南 →](docs/workflow.zh-CN.md)**
-
-## 为什么需要它
-
-单独使用规划 Skill 很有帮助，但项目依然可能跳过阶段、在会话之间丢失状态、在多份文档中重复维护决策，或者误把“已经有 Spec”当成“已经可以开发”。Project Preflight 补齐了这条生命周期：
-
-- 阶段识别与断点恢复；
-- 基于证据的 Gate；
-- 不绑定具体 Issue Tracker 的产物指针；
-- 范围与实施防护规则；
-- 核心技术假设失效后的回退机制；
-- 精确的 `READY_FOR_IMPLEMENTATION` 实施交接。
-
-它负责编排，而不是替代：
-
-- 使用 `grill-me` 完成需求探索；
-- 使用 `wayfinder` 解决尚未完成的关键决策；
-- 使用 `to-spec` 综合生成项目规格；
-- 使用 `to-tickets` 生成 Tracer Bullet Tickets。
-
-这些上游 Skill 不随本仓库打包，并继续保留各自的行为与许可证。
-
-## 本地安装
-
-将 `skills/project-preflight` 复制到 Codex Skills 目录，并保持目录名为 `project-preflight`。例如放在：
+进入每个阶段时，Project Preflight 都会告诉你当前正在使用什么能力。短名称是用户熟悉的能力名，实际执行仍由 Plugin 内部带命名空间的适配器完成：
 
 ```text
-<CODEX_HOME>/skills/project-preflight
+Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight 内置适配器）。你只需回答或确认。
 ```
 
-四个上游 Skill 需要单独安装。Project Preflight 会在阶段路由前检查依赖；如果所需 Skill 不可用，它会停止推进并给出明确的阻塞原因。
+专项 Skill 保存持久化证据后，会在同一个任务里自动把控制权交还给 Project Preflight。随后它检查 Gate、原子更新 `.project/preflight.md`、提示下一个 Skill 并继续。流程只会因为等待你的回答、真实阻塞、你主动取消或已经就绪而暂停。
 
-## 使用方式
+**[阅读完整流程 →](docs/workflow.zh-CN.md)**
 
-从一个想法开始：
+## 四道 Gate
+
+1. **问题清晰** — 用户、问题、价值、输入输出、MVP、非目标、假设和可量化成功标准清楚。
+2. **决策就绪** — 会改变架构方向的未知项和可行性风险已解决，或明确为非阻塞。
+3. **规范就绪** — 范围、行为、边界和验证方式足够明确，可以实施。
+4. **执行就绪** — Ticket 是纵向、可测试、依赖清晰的，并从最薄的 tracer bullet 开始。
+
+只有 Gate 4 通过后才会进入 `READY_FOR_IMPLEMENTATION`。终点是规范、Ticket、首个 tracer bullet、验证路径和剩余风险组成的实施交接，不是生产代码。
+
+## Plugin 架构
+
+- `skills/project-preflight/` — 唯一用户入口和状态运行时。
+- `skills/project-preflight-grill-me/` — 内置需求澄清适配器。
+- `skills/project-preflight-wayfinder/` — 内置决策适配器。
+- `skills/project-preflight-to-spec/` — 内置规范适配器。
+- `skills/project-preflight-to-tickets/` — 内置任务拆分适配器。
+- `.codex-plugin/plugin.json` — Codex Plugin 清单。
+- `docs/decisions/0003-single-entry-automatic-orchestration-plugin.md` — 当前架构决策。
+
+适配器使用命名空间，避免和用户单独安装的同名 Skill 冲突。上游启发和署名见 [第三方声明](THIRD_PARTY_NOTICES.md)。
+
+## 使用
 
 ```text
-使用 $project-preflight。我想做一个开源 Agent，用来……
+Use $project-preflight. 我想做一个开源工具，它可以……
 ```
 
-稍后恢复：
+第一条消息可以只是一句很不成熟的想法，Project Preflight 不要求你先写计划。
+
+已有项目也可以直接审计：
 
 ```text
-使用 $project-preflight 恢复这个项目的 preflight。
+Use $project-preflight 检查这个项目，并从最早缺少证据的 Gate 继续。
 ```
 
-审查已有规划：
+## 状态与安全
 
-```text
-使用 $project-preflight 判断这份 Spec 和 Tickets 是否已经可以进入实施。
-```
+`.project/preflight.md` 保存阶段、Gate、阻塞项和规范产物指针。解析、推进、回退、验证、恢复和原子写入共用同一个 State lifecycle interface。远程链接会返回明确的 evidence-adapter 结果，不会被静默当作已验证。
 
-Skill 会在目标项目中维护一个唯一的规范状态文件：
+达到 readiness 前禁止实现生产功能。如果新证据推翻了决策，流程会回退到最早受影响的阶段，自动恢复对应 Skill，并把后续产物保留为历史而非当前事实。
 
-```text
-.project/preflight.md
-```
-
-该文件记录当前阶段、Gate 状态、阻塞项，以及 Idea、Decision Map、Spec 和 Tickets 的规范产物指针，但不会复制这些产物的正文。
-
-## 就绪 Gate
-
-1. **问题清晰度** —— 用户、问题、价值、输入、输出、MVP、Non-Goals 和可衡量的成功标准都已明确。
-2. **决策就绪度** —— 可能推翻架构的未知项与可行性风险已经解决，或已明确证明不会阻塞后续工作。
-3. **规格就绪度** —— 范围、行为、测试决策和开放问题足够明确，可以判断任何功能是否属于当前项目范围。
-4. **执行就绪度** —— Tickets 是纵向、可测试、依赖正确且不超出范围的切片，并包含第一条 Tracer Bullet。
-
-只有 Gate 4 通过后，项目才能进入 `READY_FOR_IMPLEMENTATION`。
-
-## 仓库结构
-
-- `skills/project-preflight/` —— 可分发的 Skill。
-- `docs/product-spec.md` —— v0.1 产品范围和成功标准。
-- `docs/workflow.zh-CN.md` —— 完整用户旅程、Gate、产物、暂停点和回退规则。
-- `docs/decisions/` —— 仅追加演进的架构决策记录。
-- `tests/` —— 确定性的状态契约测试。
-- `evals/` —— 真实行为案例和带日期的前向评测证据。
-
-## 验证修改
-
-验证器仅使用 Python 标准库：
+## 验证改动
 
 ```text
 python -m unittest discover -s tests -v
-python skills/project-preflight/scripts/validate_preflight.py tests/fixtures/valid-idea.md --repo-root tests/fixtures
+python skills/project-preflight/scripts/preflight_state.py template --check skills/project-preflight/assets/preflight-template.md
+python evals/run_behavior_evals.py list
 ```
 
-使用 Skill Creator 的 `quick_validate.py` 检查 `skills/project-preflight`，可以验证 Skill 的打包元数据。
+同时对仓库根目录运行 Codex Plugin validator，并对 `skills/` 下的每个 Skill 运行 Skill Creator 校验。
 
-## 当前状态
+## 分支历史
 
-本仓库目前聚焦一个小而可审查的 v0.1 契约：本地 Markdown 状态、可选的远程 Tracker 指针、显式上游依赖和确定性的就绪校验。Self-hosted 本地 Happy Path 已经到达并通过验证的 `READY_FOR_IMPLEMENTATION`；实时远程 Tracker 发布和自动依赖安装仍明确推迟到后续版本。
+已验证的显式 Handoff 实验保留在 `agent/handoff-state-lifecycle`。当前分支只替换编排体验；已经验证过的状态生命周期、证据适配器、回退和评测架构继续保留。
 
 ## 许可证
 
-MIT，详见 `LICENSE`。
+MIT，详见 [LICENSE](LICENSE)。

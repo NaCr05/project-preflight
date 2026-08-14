@@ -1,6 +1,6 @@
 # ADR 0001: Keep orchestration separate from planning capabilities
 
-- **Status:** Accepted
+- **Status:** Accepted; invocation mechanism amended by ADR 0002
 - **Date:** 2026-08-13
 
 ## Context
@@ -17,7 +17,7 @@ Project Preflight will own only lifecycle concerns:
 - dependency and authorization checks;
 - rollback and implementation handoff.
 
-It will load and follow installed upstream Skills for stage work. It will store pointers to upstream artifacts rather than restating their content. Local Markdown is the v0.1 default; configured remote tracker artifacts may be referenced when their writes are authorized.
+It will store pointers to specialist artifacts rather than restating their content. ADR 0002 later validated explicit Handoff orchestration; ADR 0003 superseded that invocation mechanism with bundled automatic Stage Adapters while retaining this boundary. Local Markdown is the default; configured remote tracker artifacts may be referenced when their writes are authorized.
 
 The canonical state will be a single `.project/preflight.md` file with restricted YAML frontmatter and human-readable evidence sections.
 
@@ -43,7 +43,7 @@ Rejected because two synchronized artifacts create an unnecessary drift risk. YA
 
 - Missing upstream Skills block the affected stage instead of triggering an imitation.
 - Remote and local artifacts share a pointer contract.
-- The validator can check structural readiness but human review remains responsible for product judgment and evidence quality.
+- The State lifecycle module can enforce structural readiness, while human review remains responsible for product judgment and evidence quality.
 - Compatibility with upstream behavior must be rechecked as those Skills evolve.
 
 ## Reopen when

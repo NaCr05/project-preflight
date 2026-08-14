@@ -1,0 +1,6 @@
+interface:
+  display_name: "Preflight Ticketing Adapter"
+  short_description: "Internal tracer-bullet ticketing for Project Preflight"
+  default_prompt: "Use $project-preflight-to-tickets only as the TICKETING adapter selected by $project-preflight."
+policy:
+  allow_implicit_invocation: true
