@@ -1,10 +1,12 @@
 # ADR 0002: Use explicit handoffs and one State lifecycle interface
 
-- **Status:** Accepted
+- **Status:** Superseded by ADR 0003
 - **Date:** 2026-08-13
 - **Amends:** ADR 0001 routing mechanism; its orchestration boundary remains accepted
 
 ## Context
+
+This ADR records the architecture of the validated `agent/handoff-state-lifecycle` experiment. Its State lifecycle, contract registry, evidence adapters, and deterministic evaluations remain accepted foundations. ADR 0003 replaces only its user-invoked Handoff orchestration mechanism.
 
 The first release described upstream Skills as capabilities Project Preflight could load and follow inside one run. In practice, an upstream Skill may be installed on disk but absent from the active catalog, and several upstream Skills require explicit user invocation. The state contract also required atomic updates while providing only a validator, leaving transition construction and persistence to the calling Agent.
 

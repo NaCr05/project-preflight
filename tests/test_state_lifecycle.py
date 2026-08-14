@@ -34,7 +34,7 @@ class StateLifecycleTests(unittest.TestCase):
             clock=lambda: FIXED_TIME,
         )
 
-    def test_initialize_with_idea_enters_discovery_and_prints_explicit_handoff(self):
+    def test_initialize_with_idea_enters_discovery_and_routes_bundled_adapter(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             store = self.make_store(root)
@@ -42,9 +42,12 @@ class StateLifecycleTests(unittest.TestCase):
             self.assertTrue(report.valid)
             self.assertEqual("DISCOVERY", report.data["current_stage"])
             self.assertEqual("inline:#original-idea", report.data["artifacts"]["idea"])
-            handoff = store.handoff()
-            self.assertIn("Use $grill-me", handoff)
-            self.assertIn("Use $project-preflight to resume", handoff)
+            directive = store.directive()
+            self.assertEqual("RUN_STAGE_ADAPTER", directive.kind)
+            self.assertEqual("grill-me", directive.display_skill)
+            self.assertEqual("project-preflight-grill-me", directive.adapter_skill)
+            self.assertIn("正在使用 `grill-me`", directive.announcement)
+            self.assertIn("do not ask the user to invoke", directive.instruction.casefold())
 
     def test_invalid_candidate_does_not_replace_last_valid_state(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -72,6 +75,7 @@ class StateLifecycleTests(unittest.TestCase):
                 "Problem is clear",
                 StateChange(gate_evidence={"gate_1": "Discovery evidence."}),
             )
+            self.assertEqual("project-preflight-wayfinder", store.directive().adapter_skill)
             store.advance(
                 "SPECIFICATION",
                 "Decisions are ready",
@@ -80,6 +84,7 @@ class StateLifecycleTests(unittest.TestCase):
                     gate_evidence={"gate_2": "Decision evidence."},
                 ),
             )
+            self.assertEqual("project-preflight-to-spec", store.directive().adapter_skill)
             store.advance(
                 "TICKETING",
                 "Specification is ready",
@@ -88,6 +93,7 @@ class StateLifecycleTests(unittest.TestCase):
                     gate_evidence={"gate_3": "Specification evidence."},
                 ),
             )
+            self.assertEqual("project-preflight-to-tickets", store.directive().adapter_skill)
             ready = store.advance(
                 "READY_FOR_IMPLEMENTATION",
                 "Tickets are ready",
@@ -99,6 +105,7 @@ class StateLifecycleTests(unittest.TestCase):
             )
             self.assertTrue(ready.data["ready_for_implementation"])
             self.assertEqual(["passed"] * 4, list(ready.data["gates"].values()))
+            self.assertEqual("READY", store.directive().kind)
 
             regressed = store.regress("DECISION", "The selected provider cannot supply required data.")
             self.assertEqual("DECISION", regressed.data["current_stage"])
@@ -107,7 +114,9 @@ class StateLifecycleTests(unittest.TestCase):
             self.assertEqual("invalidated", regressed.data["gates"]["gate_3"])
             self.assertEqual("invalidated", regressed.data["gates"]["gate_4"])
             self.assertFalse(regressed.data["ready_for_implementation"])
-            self.assertIn("Use $wayfinder", store.handoff())
+            directive = store.directive()
+            self.assertEqual("wayfinder", directive.display_skill)
+            self.assertEqual("project-preflight-wayfinder", directive.adapter_skill)
 
     def test_recover_rejects_invalid_source_and_preserves_current_state(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -222,7 +231,7 @@ class StateLifecycleTests(unittest.TestCase):
         asset = REPO_ROOT / "skills" / "project-preflight" / "assets" / "preflight-template.md"
         self.assertEqual(render_initial_state(), asset.read_text(encoding="utf-8"))
 
-    def test_cli_initializes_and_emits_handoff_through_public_interface(self):
+    def test_cli_initializes_and_emits_directive_through_public_interface(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
             state = root / ".project" / "preflight.md"
@@ -246,7 +255,7 @@ class StateLifecycleTests(unittest.TestCase):
                 text=True,
             )
             self.assertEqual(0, initialized.returncode, initialized.stderr)
-            handoff = subprocess.run(
+            directive = subprocess.run(
                 [
                     sys.executable,
                     str(script),
@@ -254,15 +263,17 @@ class StateLifecycleTests(unittest.TestCase):
                     str(state),
                     "--repo-root",
                     str(root),
-                    "handoff",
+                    "directive",
+                    "--json",
                 ],
                 check=False,
                 capture_output=True,
                 text=True,
             )
-            self.assertEqual(0, handoff.returncode, handoff.stderr)
-            self.assertIn("Use $grill-me", handoff.stdout)
-            self.assertIn("Use $project-preflight to resume", handoff.stdout)
+            self.assertEqual(0, directive.returncode, directive.stderr)
+            self.assertIn('"kind": "RUN_STAGE_ADAPTER"', directive.stdout)
+            self.assertIn('"display_skill": "grill-me"', directive.stdout)
+            self.assertIn('"adapter_skill": "project-preflight-grill-me"', directive.stdout)
 
 
 if __name__ == "__main__":

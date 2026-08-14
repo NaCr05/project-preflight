@@ -1,54 +1,22 @@
-# Dependency Contract
+# Dependency contract
 
-Project Preflight composes capabilities that remain independently installed and maintained.
+The Plugin bundles four namespaced stage adapters. A normal installation therefore does not require the user to install or invoke `grill-me`, `wayfinder`, `to-spec`, or `to-tickets` separately.
 
-## Direct stage dependencies
+| Public capability | Bundled Skill | Stage |
+|---|---|---|
+| `grill-me` | `project-preflight-grill-me` | `DISCOVERY` |
+| `wayfinder` | `project-preflight-wayfinder` | `DECISION` |
+| `to-spec` | `project-preflight-to-spec` | `SPECIFICATION` |
+| `to-tickets` | `project-preflight-to-tickets` | `TICKETING` |
 
-| Stage | Required Skill |
-|---|---|
-| `DISCOVERY` | `grill-me` |
-| `DECISION` | `wayfinder` |
-| `SPECIFICATION` | `to-spec` |
-| `TICKETING` | `to-tickets` |
+Dependency status records runtime observation:
 
-Check the active Codex Skill catalog first. Do not rely on a fixed global filesystem path: files on disk do not prove that the current session can explicitly invoke a Skill. Check only the Skill required for the current Stage, while recording other observations when already known.
+- `available` — the bundled adapter can be loaded and followed;
+- `missing` — its Skill directory or instructions are unavailable;
+- `not_checked` — no runtime check has yet been recorded.
 
-Project Preflight uses **handoff orchestration**. Even when a dependency is available, do not invoke it internally. Generate the exact `$skill-name` instruction with `scripts/preflight_state.py handoff`, show it to the user, and stop. The instruction must return the user to `$project-preflight` after a durable result exists. This explicit invocation is required for upstream Skills that disable model invocation and remains the rule for all four dependencies.
+`not_checked` does not block a directive; the orchestrator attempts the bundled adapter and records the result. `missing` produces a `BLOCKED` directive and keeps the current Stage.
 
-An upstream Skill may have its own transitive capabilities, such as grilling, domain modeling, research, prototypes, or tracker setup. When the user invokes it, that Skill follows its own instructions; Project Preflight surfaces returned failures without substituting its behavior.
+Each adapter is authoritative for its bounded stage behavior. Project Preflight is authoritative for routing, visibility, Gates, state, rollback, and readiness. The orchestrator reads the adapter's bundled `SKILL.md` directly, returns automatically after durable evidence exists, and never asks the user to invoke it.
 
-## Missing Skill behavior
-
-When a required Skill is unavailable:
-
-1. Do not imitate or paraphrase it.
-2. Keep the current stage and gate unchanged.
-3. Record the dependency as `missing` and add an actionable blocker.
-4. Name the exact missing Skill and explain which stage it blocks.
-5. If files exist but the Skill is absent from the active catalog, explain that the environment may need installation, reload, or a new session; do not record it as `available`.
-6. Offer installation guidance only when a trustworthy source is available; do not install automatically.
-
-## Tracker selection
-
-Use local Markdown by default. Reuse a repository's configured tracker when all of these are true:
-
-- the tracker contract is discoverable;
-- required tools and authentication are available;
-- the user has authorized external publication or it is clearly part of the requested workflow;
-- the upstream Skill supports the tracker behavior.
-
-Without those conditions, persist local artifact pointers and do not publish externally.
-
-## Compatibility rule
-
-The explicitly invoked upstream Skill is authoritative for its own interview, mapping, spec, or ticket behavior. Project Preflight is authoritative only for handoff routing, Gates, state, and readiness. If the contracts conflict, stop and report the incompatibility rather than silently overriding either side.
-
-## State vocabulary
-
-Record dependency observations as:
-
-- `available` — present in the active catalog and explicitly invokable by the user;
-- `missing`
-- `not_checked`
-
-Do not store credentials, tokens, email addresses, or secret environment values in `.project/preflight.md`.
+Tracker reads and writes remain separate capabilities. Local Markdown is the default. Remote writes require user authorization and must not be inferred from adapter availability.

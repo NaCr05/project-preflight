@@ -1,4 +1,6 @@
 interface:
   display_name: "Project Preflight"
   short_description: "Turn project ideas into implementation-ready work"
-  default_prompt: "Use $project-preflight to assess this project, resume its planning state, and guide it to implementation readiness."
+  default_prompt: "Use $project-preflight once to guide this idea through automatic discovery, decisions, specification, and ticketing."
+policy:
+  allow_implicit_invocation: true

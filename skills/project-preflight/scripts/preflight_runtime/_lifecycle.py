@@ -25,12 +25,13 @@ from ._contract import (
     SCHEMA_VERSION,
     STAGES_BY_NAME,
     TOP_LEVEL_KEYS,
-    handoff_text,
     invalidated_gates,
+    next_action_text,
     transition_gate,
 )
 from ._document import ParseError, render_state, replace_section, section, split_state
 from ._evidence import ArtifactEvidenceChecker
+from ._orchestration import OrchestrationDirective, directive_for_state
 
 
 @dataclass(frozen=True)
@@ -290,12 +291,6 @@ def render_initial_state(project: str = "unnamed-project") -> str:
     return render_state(_initial_data(project), _initial_body())
 
 
-def handoff_for_stage(stage: str, project: str) -> str | None:
-    if stage not in ALLOWED_STAGES:
-        raise StateOperationError(f"unknown Stage: {stage}")
-    return handoff_text(stage, project)
-
-
 class StateStore:
     """Small interface hiding parsing, transitions, validation, persistence, and recovery."""
 
@@ -327,7 +322,7 @@ class StateStore:
             data["last_transition"] = self._timestamp()
             data["transition_reason"] = "Captured the original idea"
             data["artifacts"]["idea"] = "inline:#original-idea"
-            body = replace_section(body, "## Next Action", handoff_text("DISCOVERY", project) or "")
+            body = replace_section(body, "## Next Action", next_action_text("DISCOVERY"))
         return self._commit(data, body)
 
     def record(self, change: StateChange) -> ValidationReport:
@@ -359,9 +354,7 @@ class StateStore:
         data["transition_reason"] = reason
         data["ready_for_implementation"] = target_stage == "READY_FOR_IMPLEMENTATION"
         if change.next_action is None:
-            default_next = handoff_text(target_stage, data["project"])
-            if default_next is not None:
-                body = replace_section(body, "## Next Action", default_next)
+            body = replace_section(body, "## Next Action", next_action_text(target_stage))
         return self._commit(data, body)
 
     def regress(
@@ -388,7 +381,7 @@ class StateStore:
             body = replace_section(
                 body,
                 "## Next Action",
-                handoff_text(target_stage, data["project"]) or "Re-evaluate the invalidated evidence.",
+                next_action_text(target_stage),
             )
         return self._commit(data, body)
 
@@ -406,9 +399,9 @@ class StateStore:
         data, body = split_state(text)
         return self._commit(data, body)
 
-    def handoff(self) -> str | None:
+    def directive(self) -> OrchestrationDirective:
         data, _ = self._load_valid()
-        return handoff_text(data["current_stage"], data["project"])
+        return directive_for_state(data)
 
     def _load_valid(self) -> tuple[dict[str, Any], str]:
         try:

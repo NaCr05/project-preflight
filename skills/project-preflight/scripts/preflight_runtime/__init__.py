@@ -5,18 +5,19 @@ from ._lifecycle import (
     StateOperationError,
     StateStore,
     ValidationReport,
-    handoff_for_stage,
     inspect_path,
     render_initial_state,
     validate_path,
 )
+from ._orchestration import OrchestrationDirective, directive_for_state
 
 __all__ = [
     "StateChange",
     "StateOperationError",
     "StateStore",
     "ValidationReport",
-    "handoff_for_stage",
+    "OrchestrationDirective",
+    "directive_for_state",
     "inspect_path",
     "render_initial_state",
     "validate_path",

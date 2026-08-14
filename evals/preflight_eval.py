@@ -18,7 +18,7 @@ SCRIPT_ROOT = REPO_ROOT / "skills" / "project-preflight" / "scripts"
 if str(SCRIPT_ROOT) not in sys.path:
     sys.path.insert(0, str(SCRIPT_ROOT))
 
-from preflight_runtime import inspect_path  # noqa: E402
+from preflight_runtime import directive_for_state, inspect_path  # noqa: E402
 
 
 @dataclass(frozen=True)
@@ -60,8 +60,8 @@ class BehaviorEvalHarness:
             raise ValueError("unsupported behavior-eval manifest schema")
         rubric = self.manifest.get("rubric")
         cases = self.manifest.get("cases")
-        if not isinstance(rubric, list) or len(rubric) != 7 or not isinstance(cases, list):
-            raise ValueError("behavior-eval manifest must define seven rubric items and cases")
+        if not isinstance(rubric, list) or len(rubric) != 8 or not isinstance(cases, list):
+            raise ValueError("behavior-eval manifest must define eight rubric items and cases")
         self.rubric = tuple(rubric)
         self._cases = {case["id"]: case for case in cases}
         if len(self._cases) != len(cases):
@@ -175,6 +175,19 @@ class BehaviorEvalHarness:
                 and next_action != baseline.get("next_action")
             )
 
+        observed_directive = directive_for_state(data) if state_valid else None
+        expected_directive = expected.get("directive", {})
+        directive_ok = observed_directive is not None and all(
+            getattr(observed_directive, key) == value
+            for key, value in expected_directive.items()
+        )
+        if directive_ok and observed_directive.kind == "RUN_STAGE_ADAPTER":
+            directive_ok = bool(
+                observed_directive.display_skill
+                and observed_directive.display_skill in observed_directive.announcement
+                and "正在使用" in observed_directive.announcement
+            )
+
         checks = {
             "correct_stage_selection": EvalCheck(
                 stage_ok,
@@ -197,6 +210,14 @@ class BehaviorEvalHarness:
                     f"state and Next Action changed; current Next Action is: {next_action}"
                     if next_action_ok
                     else "state/Next Action did not change or Next Action is missing/placeholder"
+                ),
+            ),
+            "visible_skill_announcement": EvalCheck(
+                directive_ok,
+                (
+                    f"observed {observed_directive.to_dict()}"
+                    if observed_directive is not None
+                    else "no directive from valid state"
                 ),
             ),
         }

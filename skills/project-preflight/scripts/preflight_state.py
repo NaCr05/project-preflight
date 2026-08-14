@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 from pathlib import Path
 from typing import Any
@@ -87,7 +88,8 @@ def build_parser() -> argparse.ArgumentParser:
     regress.add_argument("--reason", required=True)
     _add_change_arguments(regress)
 
-    subparsers.add_parser("handoff", help="Print the exact explicit upstream Skill invocation")
+    directive = subparsers.add_parser("directive", help="Print the next automatic orchestration directive")
+    directive.add_argument("--json", action="store_true", help="Emit the directive as JSON")
 
     recover = subparsers.add_parser("recover", help="Atomically restore an explicitly supplied valid state")
     recover.add_argument("--source", type=Path, required=True)
@@ -120,9 +122,13 @@ def main(argv: list[str] | None = None) -> int:
         if args.command == "regress":
             _print_report(store.regress(args.target_stage, args.reason, _change(args)))
             return 0
-        if args.command == "handoff":
-            instruction = store.handoff()
-            print(instruction or "No upstream Skill handoff is required at the current Stage.")
+        if args.command == "directive":
+            directive = store.directive()
+            if args.json:
+                print(json.dumps(directive.to_dict(), ensure_ascii=False, indent=2))
+            else:
+                print(directive.announcement)
+                print(directive.instruction)
             return 0
         if args.command == "recover":
             _print_report(store.recover(args.source))

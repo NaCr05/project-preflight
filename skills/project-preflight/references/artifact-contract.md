@@ -19,7 +19,7 @@ Use exactly one project-scoped state file:
 
 Create and mutate it through `scripts/preflight_state.py`. YAML frontmatter is canonical for finite state; the Markdown body is canonical for explanations, evidence summaries, blockers, and the next action. Do not maintain a parallel status file or hand-edit the frontmatter.
 
-`scripts/preflight_runtime/_contract.py` is canonical for finite Stage, Gate, artifact, dependency, transition, and handoff mappings. `assets/preflight-template.md` is derived from that registry and must match `preflight_state.py template --check`.
+`scripts/preflight_runtime/_contract.py` is canonical for finite Stage, Gate, artifact, dependency, transition, and adapter mappings. `scripts/preflight_runtime/_orchestration.py` derives user-visible directives from that registry. `assets/preflight-template.md` is derived from the registry and must match `preflight_state.py template --check`.
 
 ## Frontmatter schema
 

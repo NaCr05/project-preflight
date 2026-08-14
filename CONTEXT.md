@@ -4,7 +4,9 @@
 - **Gate** — an evidence-backed decision that must pass before the next Stage becomes authoritative.
 - **Preflight State** — the canonical `.project/preflight.md` record of the current Stage, Gate statuses, blockers, and Artifact Evidence pointers.
 - **Artifact Evidence** — a durable inline section, repository path, or tracker record used to justify a Gate decision without duplicating the artifact.
-- **Handoff** — the explicit user-invoked transfer from Project Preflight to one upstream planning Skill, followed by an explicit return to `$project-preflight`.
+- **Stage Adapter** — a bundled, namespaced Skill that supplies one specialist planning capability while Project Preflight retains conversational control.
+- **Orchestration Directive** — the runtime result that selects idea capture, one Stage Adapter, a blocker, or readiness from validated state.
+- **Skill Visibility Banner** — the compact user-facing notice shown at Stage entry or resume that names the active planning capability.
 - **Implementation Handoff** — the terminal output produced after all four Gates pass; it names the canonical spec, approved tickets, first tracer bullet, verification path, and residual risks.
 
-These terms name the stable seams in this repository. Runtime contracts under `skills/project-preflight/references/` explain their behavior; `skills/project-preflight/scripts/preflight_runtime/_contract.py` is canonical for finite state values and mappings.
+These terms name the stable seams in this repository. Runtime contracts under `skills/project-preflight/references/` explain their behavior; `_contract.py` is canonical for finite state values and mappings, and `_orchestration.py` derives directives and visibility messages.

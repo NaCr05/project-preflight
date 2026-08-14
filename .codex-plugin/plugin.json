@@ -1,0 +1,25 @@
+{
+  "name": "project-preflight",
+  "version": "0.3.0",
+  "description": "A single-entry pre-coding orchestrator that turns rough software ideas into implementation-ready plans.",
+  "author": {
+    "name": "NaCr05",
+    "url": "https://github.com/NaCr05"
+  },
+  "homepage": "https://github.com/NaCr05/project-preflight",
+  "repository": "https://github.com/NaCr05/project-preflight",
+  "license": "MIT",
+  "keywords": ["codex", "planning", "orchestration", "skills"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "Project Preflight",
+    "shortDescription": "Turn a rough idea into an implementation-ready plan",
+    "longDescription": "Invoke Project Preflight once. It automatically coordinates discovery, decisions, specification, and ticketing while showing which Skill is active at every stage.",
+    "developerName": "NaCr05",
+    "category": "Productivity",
+    "capabilities": ["Interactive", "Write"],
+    "defaultPrompt": [
+      "Use $project-preflight to turn this rough software idea into an implementation-ready plan."
+    ]
+  }
+}

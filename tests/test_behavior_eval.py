@@ -21,9 +21,9 @@ class BehaviorEvalTests(unittest.TestCase):
     def setUp(self):
         self.harness = BehaviorEvalHarness(EVAL_ROOT / "cases.json")
 
-    def test_manifest_defines_all_five_cases_and_seven_checks(self):
+    def test_manifest_defines_all_five_cases_and_eight_checks(self):
         self.assertEqual(5, len(self.harness.list_cases()))
-        self.assertEqual(7, len(self.harness.rubric))
+        self.assertEqual(8, len(self.harness.rubric))
 
     def test_all_cases_prepare_and_score_through_the_eval_interface(self):
         with tempfile.TemporaryDirectory() as temp:
@@ -36,9 +36,9 @@ class BehaviorEvalTests(unittest.TestCase):
             vague_store.initialize("vague-idea", "Watch technical creators and report what matters.")
             vague_store.record(
                 StateChange(
-                    dependencies={"grill-me": "missing"},
-                    blockers="`grill-me` is absent from the active Skill catalog.",
-                    next_action="Install or activate `grill-me`, then resume Project Preflight.",
+                    dependencies={"grill-me": "available"},
+                    blockers="None recorded.",
+                    next_action="Continue automatically with `grill-me`; the user only answers or confirms.",
                 )
             )
 
@@ -47,7 +47,10 @@ class BehaviorEvalTests(unittest.TestCase):
                 StateChange(
                     dependencies={"wayfinder": "available"},
                     blockers="Data-source feasibility remains unresolved.",
-                    next_action=blocked_store.handoff(),
+                    next_action=(
+                        "Continue Project Preflight automatically with `wayfinder`; "
+                        "the user only answers or confirms."
+                    ),
                 )
             )
 
@@ -55,9 +58,9 @@ class BehaviorEvalTests(unittest.TestCase):
             existing_store.initialize("existing-spec", "An existing plan with unclear users and success criteria.")
             existing_store.record(
                 StateChange(
-                    dependencies={"grill-me": "missing"},
-                    blockers="Discovery evidence is missing and `grill-me` is unavailable.",
-                    next_action="Activate `grill-me`; keep the existing spec and tickets as historical evidence.",
+                    dependencies={"grill-me": "available"},
+                    blockers="Discovery evidence is missing; later artifacts remain historical evidence.",
+                    next_action="Continue automatically with `grill-me`; the user only answers or confirms.",
                 )
             )
 
@@ -85,7 +88,7 @@ class BehaviorEvalTests(unittest.TestCase):
                     cost_usd=0.0,
                 )
                 self.assertTrue(result.passed, (case_id, result.to_dict()))
-                self.assertEqual((7, 7), (result.score, result.maximum_score))
+                self.assertEqual((8, 8), (result.score, result.maximum_score))
                 self.assertIn("manifest_sha256", result.metadata)
 
     def test_unchanged_fixture_cannot_pass(self):
@@ -102,16 +105,16 @@ class BehaviorEvalTests(unittest.TestCase):
             store.initialize("vague", "A vague idea.")
             store.record(
                 StateChange(
-                    dependencies={"grill-me": "missing"},
-                    blockers="Missing `grill-me`.",
-                    next_action="Activate `grill-me` and resume.",
+                    dependencies={"grill-me": "available"},
+                    blockers="None recorded.",
+                    next_action="Continue automatically with `grill-me`.",
                 )
             )
             result = self.harness.score(prepared, model="test-model")
             json_path = prepared / "result.json"
             markdown_path = prepared / "result.md"
             self.harness.write_result(result, json_path, markdown_path)
-            self.assertIn('"score": 7', json_path.read_text(encoding="utf-8"))
+            self.assertIn('"score": 8', json_path.read_text(encoding="utf-8"))
             self.assertIn("| Check | Result | Evidence |", markdown_path.read_text(encoding="utf-8"))
 
     @staticmethod

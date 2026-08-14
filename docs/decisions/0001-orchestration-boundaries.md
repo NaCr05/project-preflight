@@ -17,7 +17,7 @@ Project Preflight will own only lifecycle concerns:
 - dependency and authorization checks;
 - rollback and implementation handoff.
 
-It will store pointers to upstream artifacts rather than restating their content. ADR 0002 later amended the invocation mechanism: Project Preflight now emits an explicit user-invoked Handoff instead of loading an upstream Skill inside the same run. Local Markdown is the default; configured remote tracker artifacts may be referenced when their writes are authorized.
+It will store pointers to specialist artifacts rather than restating their content. ADR 0002 later validated explicit Handoff orchestration; ADR 0003 superseded that invocation mechanism with bundled automatic Stage Adapters while retaining this boundary. Local Markdown is the default; configured remote tracker artifacts may be referenced when their writes are authorized.
 
 The canonical state will be a single `.project/preflight.md` file with restricted YAML frontmatter and human-readable evidence sections.
 

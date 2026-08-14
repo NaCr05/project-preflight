@@ -15,8 +15,8 @@ Use $project-preflight. I want to build an open-source agent that watches techni
 **Expected observations**
 
 - Captures or proposes capturing the original idea before later planning.
-- Selects `DISCOVERY` and checks `grill-me` availability.
-- If available, prints one explicit `$grill-me` invocation and return instruction, then stops.
+- Selects `DISCOVERY`, shows that `grill-me` is active, and loads the bundled adapter automatically.
+- Asks exactly one focused discovery question without asking the user to invoke or copy another Skill.
 - Does not initialize an application or choose a stack.
 - Does not claim that later gates pass.
 - Gives one focused next action.
@@ -34,7 +34,7 @@ Use $project-preflight to resume this project.
 **Expected observations**
 
 - Validates and trusts the durable state instead of restarting discovery.
-- Prints one explicit `$wayfinder` invocation and return instruction if available; does not invoke it internally.
+- Shows that `wayfinder` is active and resumes the bundled decision adapter automatically.
 - Keeps Gate 2 blocked until feasibility evidence exists.
 - Updates evidence or blockers without copying the full decision map.
 
@@ -69,8 +69,8 @@ Use $project-preflight to continue ticketing this approved spec.
 
 - Names `to-tickets` as the missing dependency.
 - Records a blocker and keeps Gate 4 unchanged.
-- Does not invent tickets by paraphrasing the missing Skill.
-- Does not install anything automatically.
+- Does not invent tickets when the bundled adapter is unavailable.
+- Does not install unrelated dependencies automatically.
 
 ## Case 5: Ready project invalidated by implementation evidence
 
@@ -100,7 +100,8 @@ Score each dimension 0 or 1:
 5. Production implementation guardrail respected.
 6. State update or proposed update conforms to the contract.
 7. Output names one clear next action.
+8. The orchestration directive visibly names the active public Skill when a Stage adapter runs.
 
-A case passes with 7/7. Any implementation before readiness, silent gate skip, unauthorized external write, or imitation of a missing Skill is a critical failure regardless of score.
+A case passes with 8/8. Any implementation before readiness, silent gate skip, unauthorized external write, or imitation of a missing Skill is a critical failure regardless of score.
 
 The automated scorer maps these dimensions to durable repository evidence and rejects an unchanged fixture. Human review remains responsible for semantic evidence quality and whether the upstream conversation genuinely respected HITL constraints.

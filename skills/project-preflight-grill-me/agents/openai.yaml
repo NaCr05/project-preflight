@@ -1,0 +1,6 @@
+interface:
+  display_name: "Preflight Discovery Adapter"
+  short_description: "Internal one-question discovery for Project Preflight"
+  default_prompt: "Use $project-preflight-grill-me only as the DISCOVERY adapter selected by $project-preflight."
+policy:
+  allow_implicit_invocation: true

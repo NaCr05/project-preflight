@@ -18,23 +18,29 @@ class StageContract:
     name: str
     passed_gates: int
     required_artifacts: tuple[str, ...]
-    handoff_skill: str | None
+    display_skill: str | None
+    adapter_skill: str | None
 
 
 STAGE_CONTRACTS = (
-    StageContract("IDEA", 0, (), None),
-    StageContract("DISCOVERY", 0, ("idea",), "grill-me"),
-    StageContract("DECISION", 1, ("idea",), "wayfinder"),
-    StageContract("SPECIFICATION", 2, ("idea", "decision_map"), "to-spec"),
-    StageContract("TICKETING", 3, ("idea", "decision_map", "spec"), "to-tickets"),
-    StageContract("READY_FOR_IMPLEMENTATION", 4, ARTIFACT_KEYS, None),
+    StageContract("IDEA", 0, (), None, None),
+    StageContract("DISCOVERY", 0, ("idea",), "grill-me", "project-preflight-grill-me"),
+    StageContract("DECISION", 1, ("idea",), "wayfinder", "project-preflight-wayfinder"),
+    StageContract("SPECIFICATION", 2, ("idea", "decision_map"), "to-spec", "project-preflight-to-spec"),
+    StageContract("TICKETING", 3, ("idea", "decision_map", "spec"), "to-tickets", "project-preflight-to-tickets"),
+    StageContract("READY_FOR_IMPLEMENTATION", 4, ARTIFACT_KEYS, None, None),
 )
 STAGES_BY_NAME = {contract.name: contract for contract in STAGE_CONTRACTS}
 ALLOWED_STAGES = tuple(STAGES_BY_NAME)
 DIRECT_DEPENDENCIES = {
-    contract.name: contract.handoff_skill
+    contract.name: contract.display_skill
     for contract in STAGE_CONTRACTS
-    if contract.handoff_skill is not None
+    if contract.display_skill is not None
+}
+STAGE_ADAPTERS = {
+    contract.name: contract.adapter_skill
+    for contract in STAGE_CONTRACTS
+    if contract.adapter_skill is not None
 }
 
 FORWARD_TRANSITIONS = (
@@ -88,7 +94,7 @@ REQUIRED_HEADINGS = (
     "## Next Action",
 )
 
-HANDOFF_PURPOSES = {
+STAGE_PURPOSES = {
     "DISCOVERY": (
         "clarify the target user, problem, value, inputs, outputs, MVP, non-goals, "
         "measurable success criteria, material assumptions, and whether an agent is required"
@@ -121,15 +127,15 @@ def invalidated_gates(target: str) -> tuple[str, ...]:
     return GATE_KEYS[passed:]
 
 
-def handoff_text(stage: str, project: str) -> str | None:
-    """Build the exact user-invoked handoff and return instruction for a Stage."""
+def next_action_text(stage: str) -> str:
+    """Render the durable next action without asking the user to invoke another Skill."""
 
     skill = DIRECT_DEPENDENCIES.get(stage)
     if skill is None:
-        return None
-    purpose = HANDOFF_PURPOSES[stage]
+        if stage == "IDEA":
+            return "Capture the original project idea, then continue automatically to `DISCOVERY`."
+        return "Preflight is complete; present the implementation handoff and stop."
     return (
-        f"Use ${skill} for project {project!r} to {purpose}. "
-        "Do not implement production code. When the durable result is saved or linked, stop that Skill and then run: "
-        f"Use $project-preflight to resume project {project!r} and evaluate the current gate."
+        f"Continue the active Project Preflight session automatically with `{skill}`. "
+        "The user only needs to answer or confirm; do not ask them to invoke another Skill."
     )
