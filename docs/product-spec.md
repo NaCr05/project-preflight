@@ -1,4 +1,4 @@
-# Project Preflight v0.3.1 Product Specification
+# Project Preflight v0.3.2 Product Specification
 
 ## Purpose
 
@@ -35,7 +35,7 @@ Solo developers, open-source maintainers, contributors auditing an existing plan
 ## Behavioral requirements
 
 - Select the earliest unsupported Gate even when later artifacts exist.
-- Derive one orchestration directive from validated state.
+- Accept one semantic Stage Outcome, derive any Gate or transition internally, and return one orchestration directive from validated state.
 - Announce the public capability name before Stage work and after resume.
 - Ask one consequential question at a time during discovery and decision work.
 - Persist each Gate crossing as one validated atomic transition, while allowing the conversation to continue automatically across Stages.
@@ -47,11 +47,11 @@ Solo developers, open-source maintainers, contributors auditing an existing plan
 - **Prompt:** `$project-preflight` owns the loop; adapter instructions forbid asking the user to invoke another Skill.
 - **Context:** durable state and artifact pointers make resumption independent of chat history.
 - **Tools:** local Markdown is default; remote writes require authorization.
-- **Output:** finite values come from the canonical registry and candidates validate before atomic persistence.
+- **Output:** finite values come from the canonical registry; `PreflightSession` accepts no caller-selected target Stage or Gate, and candidates validate before atomic persistence.
 - **Failure:** missing adapters, invalid state, and contradictory evidence block advancement with an actionable message.
 - **Evaluation:** deterministic tests cover directives, visibility, lifecycle, rollback, atomic writes, Plugin contracts, and behavior fixtures.
 
-## v0.3.1 success criteria
+## v0.3.2 success criteria
 
 - Plugin and all five Skills pass their official structure validators.
 - A rough idea yields a `RUN_STAGE_ADAPTER` directive for the bundled discovery adapter without a user-invoked Handoff.
@@ -63,6 +63,12 @@ Solo developers, open-source maintainers, contributors auditing an existing plan
 - Remote checks revalidate redirects, pin approved public addresses, bound responses, and strip credentials across origins.
 - CI verifies tests, exact contract projections, templates, and behavior manifests on Windows and Linux.
 - Full happy-path forward tests record tokens and latency and compare them with `evals/budgets.json`.
+- Maintainers, CI, and tagged releases share one repository-owned Release Harness.
+- Two builds from identical source produce byte-identical Plugin archives and checksums.
+- The public-submission inventory contains at least five positive and three negative fresh-context cases.
+- Reader-facing status distinguishes source availability, GitHub releases, and the public Plugin Directory.
+- Privacy, terms, support, contribution, security, and repository knowledge-authority routes are explicit and verifiable.
+- Skill instructions and behavior-eval drivers use the outcome-oriented `PreflightSession` seam while lower-level StateStore commands remain compatible.
 
 ## Deferred work
 

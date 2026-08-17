@@ -7,7 +7,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from ._contract import STAGE_CONTRACTS, STAGES_BY_NAME
+from ._contract import ARTIFACT_STAGES, OUTCOME_BEHAVIORS, STAGE_CONTRACTS, STAGES_BY_NAME
 
 
 START = "<!-- project-preflight:generated {name}:start -->"
@@ -80,6 +80,26 @@ def _stage_invariant_table() -> str:
     return "\n".join(lines)
 
 
+def _session_outcome_table() -> str:
+    lines = [
+        "| Verdict | Meaning | Session behavior |",
+        "|---|---|---|",
+    ]
+    for verdict, (meaning, behavior) in OUTCOME_BEHAVIORS.items():
+        lines.append(f"| `{verdict}` | {meaning} | {behavior} |")
+    return "\n".join(lines)
+
+
+def _artifact_regression_table() -> str:
+    lines = [
+        "| Invalidated artifact | Earliest affected Stage |",
+        "|---|---|",
+    ]
+    for artifact, stage in ARTIFACT_STAGES.items():
+        lines.append(f"| `{artifact}` | `{stage}` |")
+    return "\n".join(lines)
+
+
 TARGETS = (
     ProjectionTarget(
         "skills/project-preflight/references/workflow.md",
@@ -100,6 +120,16 @@ TARGETS = (
         "skills/project-preflight/references/artifact-contract.md",
         "stage-invariant-table",
         _stage_invariant_table,
+    ),
+    ProjectionTarget(
+        "skills/project-preflight/references/session-contract.md",
+        "session-outcome-table",
+        _session_outcome_table,
+    ),
+    ProjectionTarget(
+        "skills/project-preflight/references/session-contract.md",
+        "artifact-regression-table",
+        _artifact_regression_table,
     ),
 )
 

@@ -9,4 +9,4 @@ Act as the `to-spec` capability inside Project Preflight. Treat approved discove
 
 The specification must define scope, users, user-visible behavior, inputs and outputs, data and integration boundaries, failure behavior, non-goals, testing and evaluation expectations, measurable acceptance criteria, rollout constraints, and explicitly deferred questions. Mark contradictions or missing blocking decisions instead of papering them over. Do not implement production code.
 
-Ask the user only when a missing choice materially changes the specification. Save or identify the canonical spec, then return control to `$project-preflight` automatically in the same task. Never ask the user to invoke another Skill.
+Ask the user only when a missing choice materially changes the specification. Save or identify the canonical spec, then return its pointer and Gate evidence to `$project-preflight` as a semantic result. Do not choose a target Stage or Gate. Return control automatically in the same task. Never ask the user to invoke another Skill.

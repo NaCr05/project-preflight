@@ -2,6 +2,26 @@
 
 All notable changes to Project Preflight are documented here. Versions follow Semantic Versioning.
 
+## [0.3.2] - 2026-08-17
+
+### Added
+
+- One repository-owned Release Harness for local verification, CI, tagged release checks, and deterministic archive construction.
+- An outcome-oriented `PreflightSession` Module that accepts `StageOutcome` results and internally derives Gate changes, forward transitions, regressions, atomic persistence, and the next directive.
+- Reproducible Plugin archives with a two-build checksum regression test.
+- A public-submission preparation packet with five positive and three negative behavior cases.
+- Privacy, terms, support, issue, pull-request, and repository knowledge-governance artifacts.
+
+### Changed
+
+- English and Simplified Chinese READMEs now distinguish source availability, GitHub release status, and public Plugin Directory status.
+- CI and the tagged Release workflow now use the same maintainer verification Interface.
+- Product, release, and behavior-eval version facts are checked against the Plugin manifest.
+
+### Not released
+
+- This source version does not by itself create a GitHub tag, make the repository public, or submit the Plugin to the public directory.
+
 ## [0.3.1] - 2026-08-14
 
 ### Added

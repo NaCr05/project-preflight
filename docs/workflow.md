@@ -51,7 +51,7 @@ Project Preflight pauses when it needs a user answer, external authorization, un
 
 ## Regression
 
-If new evidence overturns an assumption, the State lifecycle returns to the earliest affected Stage. Affected Gates become `invalidated`; later artifacts remain visible but non-authoritative. The matching adapter is announced and resumed automatically.
+If new evidence overturns an assumption, Project Preflight names the invalidated domain artifact in a Stage Outcome. `PreflightSession` derives the earliest affected Stage; callers do not select it directly. Affected Gates become `invalidated`, later artifacts remain visible but non-authoritative, and the matching adapter is announced and resumed automatically.
 
 ## Endpoint
 

@@ -11,6 +11,31 @@ GATE_STATUSES = {"not_evaluated", "blocked", "passed", "invalidated"}
 ARTIFACT_KEYS = ("idea", "decision_map", "spec", "tickets")
 DEPENDENCY_KEYS = ("grill-me", "wayfinder", "to-spec", "to-tickets")
 DEPENDENCY_STATUSES = {"available", "missing", "not_checked"}
+OUTCOME_BEHAVIORS = {
+    "recorded": (
+        "Durable observations changed but no Gate was judged",
+        "Preserve the Stage, persist updates, derive the directive",
+    ),
+    "gate_passed": (
+        "The current Stage's Gate has sufficient evidence",
+        "Derive the current Gate and next Stage, advance once",
+    ),
+    "gate_blocked": (
+        "The current Stage's Gate lacks required evidence",
+        "Derive and block the current Gate without advancing",
+    ),
+    "evidence_invalidated": (
+        "Canonical artifact authority was contradicted",
+        "Derive the earliest affected Stage from artifact ownership and invalidate later Gates",
+    ),
+}
+OUTCOME_VERDICTS = tuple(OUTCOME_BEHAVIORS)
+ARTIFACT_STAGES = {
+    "idea": "DISCOVERY",
+    "decision_map": "DECISION",
+    "spec": "SPECIFICATION",
+    "tickets": "TICKETING",
+}
 
 
 @dataclass(frozen=True)
@@ -86,6 +111,7 @@ FORWARD_TRANSITIONS = (
     ("SPECIFICATION", "TICKETING"),
     ("TICKETING", "READY_FOR_IMPLEMENTATION"),
 )
+FORWARD_TARGETS = dict(FORWARD_TRANSITIONS)
 REGRESSION_TARGETS = {
     "DECISION": ("DISCOVERY",),
     "SPECIFICATION": ("DECISION", "DISCOVERY"),

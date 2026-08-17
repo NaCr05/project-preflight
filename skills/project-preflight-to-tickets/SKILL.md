@@ -9,4 +9,4 @@ Act as the `to-tickets` capability inside Project Preflight. Use the canonical s
 
 Every ticket must name its outcome, in-scope and out-of-scope work, dependencies or blockers, acceptance criteria, and verification. Avoid horizontal layer tickets, speculative infrastructure, duplicated requirements, and hidden scope expansion. Flag any specification contradiction rather than resolving it silently. Do not implement production code.
 
-Save or identify the canonical ticket set and first unblocked tracer bullet, then return control to `$project-preflight` automatically in the same task. Never ask the user to invoke another Skill.
+Save or identify the canonical ticket set and first unblocked tracer bullet, then return their pointers and Gate evidence to `$project-preflight` as a semantic result. Do not choose a target Stage or Gate. Return control automatically in the same task. Never ask the user to invoke another Skill.

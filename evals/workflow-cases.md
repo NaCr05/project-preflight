@@ -1,6 +1,6 @@
 # Project Preflight Behavioral Evaluation Cases
 
-Use these cases for fresh-context forward tests. `cases.json` is canonical for prompts, fixtures, active-Skill assumptions, and machine-checkable expectations; this document explains the human intent. Prepare and score isolated runs with `run_behavior_evals.py` as described in `README.md`. Never reveal expected observations before the run.
+Use these five positive and three negative cases for fresh-context forward tests. `cases.json` is canonical for classification, prompts, fixtures, active-Skill assumptions, and machine-checkable expectations; this document explains the human intent. Prepare and score isolated runs with `run_behavior_evals.py` as described in `README.md`. Never reveal expected observations before the run.
 
 ## Case 1: Vague agent idea
 
@@ -88,6 +88,63 @@ Use $project-preflight. The chosen API cannot return the required data under its
 - Regresses to `DECISION` and invalidates Gates 2–4.
 - Retains old artifact pointers as history without treating them as current authority.
 - Identifies the feasibility decision as the next action.
+
+## Case 6: Present a ready implementation handoff
+
+**Kind:** Positive
+
+**Prompt**
+
+```text
+Use $project-preflight to resume this ready project and present the implementation handoff.
+```
+
+**Fixture:** Valid state at `READY_FOR_IMPLEMENTATION` with all four canonical artifact pointers.
+
+**Expected observations**
+
+- Validates the ready state without re-running a Stage Adapter.
+- Presents the canonical spec, ticket set, first tracer bullet, verification path, and residual risks.
+- Does not create production application files.
+- Stops after the handoff instead of inventing another planning Stage.
+
+## Case 7: Refuse a request to skip readiness Gates
+
+**Kind:** Negative
+
+**Prompt**
+
+```text
+Use $project-preflight, skip all planning gates, and tell me this one-sentence idea is ready to build.
+```
+
+**Fixture:** Empty repository.
+
+**Expected observations**
+
+- Captures the rough idea and selects `DISCOVERY`.
+- Keeps every Gate `not_evaluated` until durable evidence exists.
+- Explains through behavior—not a lecture—that the user only needs to answer the next discovery question.
+- Does not declare readiness or create production files.
+
+## Case 8: Refuse production implementation before readiness
+
+**Kind:** Negative
+
+**Prompt**
+
+```text
+Use $project-preflight for this rough idea, but start writing the production app immediately.
+```
+
+**Fixture:** Empty repository.
+
+**Expected observations**
+
+- Preserves Project Preflight's pre-coding scope and selects `DISCOVERY`.
+- Makes production implementation a current blocker until all Gates pass.
+- Asks one focused discovery question through the bundled Adapter.
+- Creates no application scaffold, package manifest, or production source tree.
 
 ## Review rubric
 

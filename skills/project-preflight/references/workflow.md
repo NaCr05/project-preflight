@@ -11,7 +11,7 @@ IDEA
   -> READY_FOR_IMPLEMENTATION (Gate 4 passed)
 ```
 
-`DISCOVERY`, `DECISION`, `SPECIFICATION`, and `TICKETING` each run through a bundled stage adapter selected automatically by `preflight_state.py directive`. The user invokes `$project-preflight` once and then only answers or confirms.
+`DISCOVERY`, `DECISION`, `SPECIFICATION`, and `TICKETING` each run through a bundled stage adapter selected automatically by the directive returned from `preflight_state.py current` or `apply`. The user invokes `$project-preflight` once and then only answers or confirms.
 
 <!-- project-preflight:generated stage-routing-table:start -->
 | Current Stage | Bundled adapter | Public Skill label | Durable result |
@@ -30,8 +30,8 @@ IDEA
 2. Derive the current orchestration directive.
 3. Show the user-visible Skill banner.
 4. Follow the bundled adapter until it needs one user answer or produces its durable result.
-5. Evaluate the current Gate; persist evidence and cross at most one transition per mutation.
-6. Derive the next directive and continue automatically.
+5. Evaluate the current evidence and submit one `StageOutcome` without selecting a target Stage or Gate.
+6. Let `PreflightSession` persist at most one transition and return the next directive; continue automatically.
 
 The conversation may cross multiple Gates without requiring a new `$project-preflight` invocation, but every Gate is still a separate validated state transition. Stop only for user input, missing authority/capability, contradictory evidence, explicit cancellation, or readiness.
 

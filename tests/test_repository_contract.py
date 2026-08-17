@@ -129,13 +129,23 @@ class RepositoryContractTests(unittest.TestCase):
         manifest = json.loads((REPO_ROOT / "evals" / "cases.json").read_text(encoding="utf-8"))
         self.assertEqual(1, manifest["schema_version"])
         self.assertEqual(8, len(manifest["rubric"]))
-        self.assertEqual(5, len(manifest["cases"]))
-        self.assertEqual(5, len({case["id"] for case in manifest["cases"]}))
+        self.assertEqual(8, len(manifest["cases"]))
+        self.assertEqual(8, len({case["id"] for case in manifest["cases"]}))
+        self.assertEqual(
+            {"positive": 5, "negative": 3},
+            {
+                kind: sum(case["submission_kind"] == kind for case in manifest["cases"])
+                for kind in ("positive", "negative")
+            },
+        )
 
     def test_plugin_and_current_architecture_decision_exist(self):
         self.assertTrue((REPO_ROOT / "CONTEXT.md").is_file())
         self.assertTrue(
             (REPO_ROOT / "docs" / "decisions" / "0003-single-entry-automatic-orchestration-plugin.md").is_file()
+        )
+        self.assertTrue(
+            (REPO_ROOT / "docs" / "decisions" / "0005-outcome-oriented-preflight-session.md").is_file()
         )
         manifest = json.loads((REPO_ROOT / ".codex-plugin" / "plugin.json").read_text(encoding="utf-8"))
         self.assertEqual("project-preflight", manifest["name"])
@@ -169,11 +179,46 @@ class RepositoryContractTests(unittest.TestCase):
         self.assertGreater(ceiling["total_tokens"], baseline["total_tokens_approx"])
         self.assertGreater(ceiling["latency_ms"], baseline["latency_ms_approx"])
 
-    def test_readmes_document_real_install_update_and_remove_commands(self):
+    def test_public_readiness_routes_and_workflows_exist(self):
+        for path in (
+            "SUPPORT.md",
+            "docs/privacy.md",
+            "docs/terms.md",
+            "docs/plugin-submission.md",
+            "docs/knowledge-map.json",
+            ".github/ISSUE_TEMPLATE/bug.yml",
+            ".github/ISSUE_TEMPLATE/feature.yml",
+            ".github/pull_request_template.md",
+            "scripts/release_harness.py",
+        ):
+            self.assertTrue((REPO_ROOT / path).is_file(), path)
+
+        for path in (".github/workflows/ci.yml", ".github/workflows/release.yml"):
+            workflow = (REPO_ROOT / path).read_text(encoding="utf-8")
+            self.assertIn("python scripts/release_harness.py verify", workflow)
+        release = (REPO_ROOT / ".github/workflows/release.yml").read_text(encoding="utf-8")
+        self.assertIn("release_harness.py build", release)
+
         for path in ("README.md", "README.zh-CN.md"):
             text = (REPO_ROOT / path).read_text(encoding="utf-8")
+            self.assertIn("GitHub Release", text)
+            self.assertIn("Plugin Directory", text)
+            self.assertIn("scripts/release_harness.py verify", text)
+
+    def test_readmes_document_synced_quick_start_and_lifecycle_commands(self):
+        headings = {
+            "README.md": "## Quick start from source",
+            "README.zh-CN.md": "## 从源码快速开始",
+        }
+        for path, heading in headings.items():
+            text = (REPO_ROOT / path).read_text(encoding="utf-8")
+            self.assertIn(heading, text)
+            self.assertIn("git clone https://github.com/NaCr05/project-preflight.git", text)
+            self.assertIn("Use $plugin-creator to add the existing Plugin", text)
             self.assertIn("codex plugin add project-preflight@personal", text)
             self.assertIn("codex plugin list", text)
+            self.assertIn("Use $project-preflight.", text)
+            self.assertIn(".project/preflight.md", text)
             self.assertIn("codex plugin remove project-preflight@personal", text)
             self.assertIn("pull --ff-only", text)
 
@@ -183,7 +228,16 @@ class RepositoryContractTests(unittest.TestCase):
             self.assertTrue((root / "SKILL.md").is_file())
             metadata = (root / "agents" / "openai.yaml").read_text(encoding="utf-8")
             self.assertIn("allow_implicit_invocation: true", metadata)
-            self.assertIn("Never ask the user to invoke another Skill", (root / "SKILL.md").read_text(encoding="utf-8"))
+            skill_text = (root / "SKILL.md").read_text(encoding="utf-8")
+            self.assertIn("Never ask the user to invoke another Skill", skill_text)
+            self.assertIn("Do not choose a target Stage or Gate", skill_text)
+
+    def test_primary_skill_uses_the_outcome_oriented_session_seam(self):
+        skill = (SKILL_ROOT / "SKILL.md").read_text(encoding="utf-8")
+        self.assertIn("current --json", skill)
+        self.assertIn("apply --json", skill)
+        self.assertIn("StageOutcome", skill)
+        self.assertIn("compatibility interfaces", skill)
 
 
 if __name__ == "__main__":

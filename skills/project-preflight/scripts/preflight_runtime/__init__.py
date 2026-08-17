@@ -10,6 +10,7 @@ from ._lifecycle import (
     validate_path,
 )
 from ._orchestration import OrchestrationDirective, directive_for_state
+from ._session import PreflightSession, SessionResult, StageOutcome
 
 __all__ = [
     "StateChange",
@@ -17,6 +18,9 @@ __all__ = [
     "StateStore",
     "ValidationReport",
     "OrchestrationDirective",
+    "PreflightSession",
+    "SessionResult",
+    "StageOutcome",
     "directive_for_state",
     "inspect_path",
     "render_initial_state",

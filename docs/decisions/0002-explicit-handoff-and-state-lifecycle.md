@@ -3,6 +3,7 @@
 - **Status:** Superseded by ADR 0003
 - **Date:** 2026-08-13
 - **Amends:** ADR 0001 routing mechanism; its orchestration boundary remains accepted
+- **State interface refined by:** ADR 0005
 
 ## Context
 
