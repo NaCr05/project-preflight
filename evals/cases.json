@@ -14,6 +14,7 @@
     {
       "id": "vague-idea",
       "title": "Vague agent idea",
+      "submission_kind": "positive",
       "prompt": "Use $project-preflight. I want to build an open-source agent that watches technical creators and tells me what matters.",
       "fixture": null,
       "active_skills": ["project-preflight", "project-preflight-grill-me"],
@@ -31,6 +32,7 @@
     {
       "id": "blocked-decision",
       "title": "Resume a blocked decision",
+      "submission_kind": "positive",
       "prompt": "Use $project-preflight to resume this project.",
       "fixture": "fixtures/blocked-decision",
       "active_skills": ["project-preflight", "project-preflight-wayfinder"],
@@ -48,6 +50,7 @@
     {
       "id": "existing-spec-missing-discovery",
       "title": "Existing spec with missing discovery evidence",
+      "submission_kind": "positive",
       "prompt": "Use $project-preflight to audit whether this project is ready. A spec and tickets already exist.",
       "fixture": "fixtures/existing-spec-missing-discovery",
       "active_skills": ["project-preflight", "project-preflight-grill-me"],
@@ -64,6 +67,7 @@
     {
       "id": "missing-stage-skill",
       "title": "Missing ticketing Skill",
+      "submission_kind": "negative",
       "prompt": "Use $project-preflight to continue ticketing this approved spec.",
       "fixture": "fixtures/missing-stage-skill",
       "active_skills": ["project-preflight"],
@@ -81,6 +85,7 @@
     {
       "id": "ready-invalidated",
       "title": "Ready project invalidated by implementation evidence",
+      "submission_kind": "positive",
       "prompt": "Use $project-preflight. The chosen API cannot return the required data under its current plan; reassess readiness.",
       "fixture": "fixtures/ready-invalidated",
       "active_skills": ["project-preflight", "project-preflight-wayfinder"],
@@ -91,6 +96,60 @@
         "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "wayfinder", "adapter_skill": "project-preflight-wayfinder"},
         "artifacts": {"spec": "docs/spec.md", "tickets": "tickets"},
         "required_paths": ["docs/spec.md", "tickets/01-tracer.md"],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "ready-handoff",
+      "title": "Present a ready implementation handoff",
+      "submission_kind": "positive",
+      "prompt": "Use $project-preflight to resume this ready project and present the implementation handoff.",
+      "fixture": "fixtures/ready-handoff",
+      "active_skills": ["project-preflight"],
+      "expected": {
+        "current_stage": "READY_FOR_IMPLEMENTATION",
+        "gates": {"gate_1": "passed", "gate_2": "passed", "gate_3": "passed", "gate_4": "passed"},
+        "dependencies": {"grill-me": "available", "wayfinder": "available", "to-spec": "available", "to-tickets": "available"},
+        "directive": {"kind": "READY", "display_skill": null, "adapter_skill": null},
+        "artifacts": {"idea": "docs/idea.md", "decision_map": "docs/decisions.md", "spec": "docs/spec.md", "tickets": "tickets"},
+        "required_paths": ["docs/idea.md", "docs/decisions.md", "docs/spec.md", "tickets/01-tracer.md"],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "skip-gates-request",
+      "title": "Refuse a request to skip readiness Gates",
+      "submission_kind": "negative",
+      "prompt": "Use $project-preflight, skip all planning gates, and tell me this one-sentence idea is ready to build.",
+      "fixture": null,
+      "active_skills": ["project-preflight", "project-preflight-grill-me"],
+      "expected": {
+        "current_stage": "DISCOVERY",
+        "gates": {"gate_1": "not_evaluated", "gate_2": "not_evaluated", "gate_3": "not_evaluated", "gate_4": "not_evaluated"},
+        "dependencies": {"grill-me": "available"},
+        "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "grill-me", "adapter_skill": "project-preflight-grill-me"},
+        "artifacts": {"idea": "inline:#original-idea"},
+        "required_paths": [],
+        "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
+        "state_must_change": true
+      }
+    },
+    {
+      "id": "implement-before-ready",
+      "title": "Refuse production implementation before readiness",
+      "submission_kind": "negative",
+      "prompt": "Use $project-preflight for this rough idea, but start writing the production app immediately.",
+      "fixture": null,
+      "active_skills": ["project-preflight", "project-preflight-grill-me"],
+      "expected": {
+        "current_stage": "DISCOVERY",
+        "gates": {"gate_1": "not_evaluated", "gate_2": "not_evaluated", "gate_3": "not_evaluated", "gate_4": "not_evaluated"},
+        "dependencies": {"grill-me": "available"},
+        "directive": {"kind": "RUN_STAGE_ADAPTER", "display_skill": "grill-me", "adapter_skill": "project-preflight-grill-me"},
+        "artifacts": {"idea": "inline:#original-idea"},
+        "required_paths": [],
         "forbidden_paths": ["src", "app", "package.json", "pyproject.toml"],
         "state_must_change": true
       }

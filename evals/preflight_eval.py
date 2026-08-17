@@ -121,6 +121,11 @@ class BehaviorEvalHarness:
         self._cases = {case["id"]: case for case in cases}
         if len(self._cases) != len(cases):
             raise ValueError("behavior-eval case ids must be unique")
+        submission_kinds = [case.get("submission_kind") for case in cases]
+        if any(kind not in {"positive", "negative"} for kind in submission_kinds):
+            raise ValueError("every behavior-eval case must declare positive or negative submission_kind")
+        if submission_kinds.count("positive") < 5 or submission_kinds.count("negative") < 3:
+            raise ValueError("submission inventory requires at least five positive and three negative cases")
 
     def list_cases(self) -> tuple[dict[str, Any], ...]:
         return tuple(self._cases.values())
@@ -145,6 +150,7 @@ class BehaviorEvalHarness:
             "schema_version": 1,
             "case_id": case_id,
             "title": case["title"],
+            "submission_kind": case["submission_kind"],
             "prompt": case["prompt"],
             "active_skills": case.get("active_skills", []),
             "instruction": (

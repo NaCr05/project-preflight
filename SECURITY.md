@@ -2,11 +2,13 @@
 
 ## Supported version
 
-Security fixes target the latest released version on `main`. Older experimental branches are retained as historical evidence and are not supported release lines.
+Security fixes target the latest source version on `main` and the latest tagged release when one exists. Older experimental branches are retained as historical evidence and are not supported release lines.
 
 ## Reporting a vulnerability
 
-Do not open a public issue for a suspected vulnerability. Use GitHub's private vulnerability reporting or a private Security Advisory for this repository. Include the affected version, reproduction steps, impact, and any suggested mitigation. Do not include real credentials or private project artifacts.
+Do not open a public issue with vulnerability details. Use GitHub's private vulnerability reporting when the repository exposes that option. If it is unavailable, open a minimal non-sensitive support issue asking the maintainer to establish a private reporting channel; include no vulnerability facts beyond the request for private contact.
+
+In the eventual private report, include the affected version, reproduction steps, impact, and any suggested mitigation. Do not include real credentials or private project artifacts. The current public-readiness review found that private vulnerability reporting was not yet available through the repository, so enabling and testing it remains a maintainer action before public submission.
 
 ## Security model
 

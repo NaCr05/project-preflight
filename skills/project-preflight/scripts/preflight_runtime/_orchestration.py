@@ -82,6 +82,7 @@ def directive_for_state(
         instruction=(
             f"Load and follow the bundled `${adapter_skill}` Skill to {purpose}. "
             "Do not ask the user to invoke or paste another Skill command. After its durable artifact is saved, "
-            "return control to Project Preflight in the same task, evaluate the Gate, persist the transition, and continue."
+            "return control to Project Preflight in the same task and submit one semantic StageOutcome. "
+            "PreflightSession derives and persists any Gate transition and returns the next directive."
         ),
     )

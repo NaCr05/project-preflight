@@ -1,0 +1,233 @@
+{
+  "schema_version": 1,
+  "artifacts": [
+    {
+      "artifact": "repository-entry",
+      "path": "README.md",
+      "primary_role": "navigation_routing",
+      "secondary_roles": ["state_evidence"],
+      "update_semantics": "stable_entry",
+      "authority": "explanatory",
+      "authority_scope": "English reader orientation, current distribution status, and task routing",
+      "owner": "maintainers",
+      "update_trigger": "User flow, distribution status, or major repository route changes",
+      "verification": "Release Harness version/status checks and repository contract tests",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["scripts/release_harness.py", "tests/test_repository_contract.py"],
+      "relations": [
+        {"type": "source_of_truth", "target": "product-contract"},
+        {"type": "source_of_truth", "target": "plugin-identity"},
+        {"type": "routes_to", "target": "runtime-contracts"}
+      ]
+    },
+    {
+      "artifact": "repository-entry-zh-cn",
+      "path": "README.zh-CN.md",
+      "primary_role": "navigation_routing",
+      "secondary_roles": ["state_evidence"],
+      "update_semantics": "synchronized",
+      "authority": "explanatory",
+      "authority_scope": "Simplified Chinese reader orientation and current distribution status",
+      "owner": "maintainers",
+      "update_trigger": "English README user-visible facts change",
+      "verification": "Reciprocal-link and Release Harness version checks",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["scripts/release_harness.py", "tests/test_repository_contract.py"],
+      "relations": [
+        {"type": "source_of_truth", "target": "repository-entry"},
+        {"type": "source_of_truth", "target": "product-contract"}
+      ]
+    },
+    {
+      "artifact": "plugin-identity",
+      "path": ".codex-plugin/plugin.json",
+      "primary_role": "specifications_contracts",
+      "secondary_roles": [],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Plugin package identity, version, capabilities, and discovery metadata",
+      "owner": "maintainers",
+      "update_trigger": "Release version or Plugin discovery metadata changes",
+      "verification": "Official Plugin validator and Release Harness",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["scripts/release_harness.py"],
+      "relations": [
+        {"type": "verified_by", "target": "release-harness"}
+      ]
+    },
+    {
+      "artifact": "agent-rules",
+      "path": "AGENTS.md",
+      "primary_role": "rules_boundaries",
+      "secondary_roles": ["navigation_routing"],
+      "update_semantics": "stable_entry",
+      "authority": "canonical",
+      "authority_scope": "Repository-wide agent behavior and verification boundaries",
+      "owner": "maintainers",
+      "update_trigger": "Repository workflow, authority, or safety boundary changes",
+      "verification": "Pull-request review and Release Harness verification",
+      "enforcement_level": "review_required",
+      "enforced_by": [".github/pull_request_template.md"],
+      "relations": [
+        {"type": "routes_to", "target": "runtime-contract-registry"},
+        {"type": "routes_to", "target": "release-harness"}
+      ]
+    },
+    {
+      "artifact": "product-contract",
+      "path": "docs/product-spec.md",
+      "primary_role": "specifications_contracts",
+      "secondary_roles": ["rules_boundaries"],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Product purpose, behavior, non-goals, reliability requirements, and release success criteria",
+      "owner": "maintainers",
+      "update_trigger": "User-visible behavior, goals, or release criteria change",
+      "verification": "Release Harness version check and pull-request review",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["scripts/release_harness.py"],
+      "relations": [
+        {"type": "verified_by", "target": "behavior-evals"},
+        {"type": "evidenced_by", "target": "eval-results"}
+      ]
+    },
+    {
+      "artifact": "runtime-contract-registry",
+      "path": "skills/project-preflight/scripts/preflight_runtime/_contract.py",
+      "primary_role": "specifications_contracts",
+      "secondary_roles": [],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Finite Stage, Gate, artifact, dependency, transition, Stage Outcome, and Adapter mappings",
+      "owner": "runtime maintainers",
+      "update_trigger": "Any finite lifecycle fact changes",
+      "verification": "Exact projection tests and lifecycle tests",
+      "enforcement_level": "structural_prevention",
+      "enforced_by": ["skills/project-preflight/scripts/sync_contract.py", "tests/test_preflight_session.py"],
+      "relations": [
+        {"type": "verified_by", "target": "runtime-contracts"}
+      ]
+    },
+    {
+      "artifact": "preflight-session",
+      "path": "skills/project-preflight/scripts/preflight_runtime/_session.py",
+      "primary_role": "specifications_contracts",
+      "secondary_roles": ["execution_verification"],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Outcome interpretation, Gate and transition derivation, atomic lifecycle completion, and next-directive return",
+      "owner": "runtime maintainers",
+      "update_trigger": "Stage Outcome behavior, lifecycle orchestration, or compatibility boundary changes",
+      "verification": "Preflight Session tests and behavior-eval drivers",
+      "enforcement_level": "structural_prevention",
+      "enforced_by": ["tests/test_preflight_session.py", "tests/test_behavior_eval.py"],
+      "relations": [
+        {"type": "source_of_truth", "target": "runtime-contract-registry"},
+        {"type": "verified_by", "target": "behavior-evals"}
+      ]
+    },
+    {
+      "artifact": "runtime-contracts",
+      "path": "skills/project-preflight/references",
+      "primary_role": "specifications_contracts",
+      "secondary_roles": ["rules_boundaries"],
+      "update_semantics": "synchronized",
+      "authority": "explanatory",
+      "authority_scope": "Human-readable lifecycle, Gate, evidence, dependency, and orchestration contracts",
+      "owner": "runtime maintainers",
+      "update_trigger": "Canonical registry or non-finite runtime behavior changes",
+      "verification": "Contract Projection Module and repository tests",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["skills/project-preflight/scripts/sync_contract.py"],
+      "relations": [
+        {"type": "source_of_truth", "target": "runtime-contract-registry"},
+        {"type": "generated_from", "target": "runtime-contract-registry"}
+      ]
+    },
+    {
+      "artifact": "decision-history",
+      "path": "docs/decisions",
+      "primary_role": "rationale_history",
+      "secondary_roles": [],
+      "update_semantics": "append_only",
+      "authority": "canonical",
+      "authority_scope": "Accepted architectural rationale and explicit supersession history",
+      "owner": "maintainers",
+      "update_trigger": "A durable architectural decision is accepted, superseded, or reopened",
+      "verification": "Pull-request review of status and supersession links",
+      "enforcement_level": "review_required",
+      "enforced_by": [".github/pull_request_template.md"],
+      "relations": [
+        {"type": "routes_to", "target": "runtime-contracts"}
+      ]
+    },
+    {
+      "artifact": "behavior-evals",
+      "path": "evals/cases.json",
+      "primary_role": "execution_verification",
+      "secondary_roles": ["specifications_contracts"],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Behavior-case prompts, classifications, fixtures, and machine-checkable expectations",
+      "owner": "evaluation maintainers",
+      "update_trigger": "User-visible orchestration behavior or submission test inventory changes",
+      "verification": "BehaviorEvalHarness, contract projections, and unit tests",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["evals/preflight_eval.py", "tests/test_behavior_eval.py"],
+      "relations": [
+        {"type": "verified_by", "target": "release-harness"}
+      ]
+    },
+    {
+      "artifact": "eval-results",
+      "path": "evals/results-*.md",
+      "primary_role": "state_evidence",
+      "secondary_roles": ["execution_verification"],
+      "update_semantics": "append_only",
+      "authority": "evidence",
+      "authority_scope": "Recorded real-run outcomes, cost, latency, and limitations",
+      "owner": "evaluation maintainers",
+      "update_trigger": "A comparable real behavior run is accepted",
+      "verification": "Result schema review and budget comparison",
+      "enforcement_level": "review_required",
+      "enforced_by": ["evals/run_behavior_evals.py"],
+      "relations": [
+        {"type": "routes_to", "target": "behavior-evals"}
+      ]
+    },
+    {
+      "artifact": "release-harness",
+      "path": "scripts/release_harness.py",
+      "primary_role": "execution_verification",
+      "secondary_roles": ["rules_boundaries"],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Repository-owned release inspection, verification order, package allowlist, and reproducible archive construction",
+      "owner": "release maintainers",
+      "update_trigger": "Release contract, package contents, or repository verification changes",
+      "verification": "Release Harness unit tests and two-build checksum comparison",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["tests/test_release_harness.py", ".github/workflows/ci.yml"],
+      "relations": [
+        {"type": "routes_to", "target": "behavior-evals"}
+      ]
+    },
+    {
+      "artifact": "knowledge-registry",
+      "path": "docs/knowledge-map.json",
+      "primary_role": "specifications_contracts",
+      "secondary_roles": ["navigation_routing"],
+      "update_semantics": "synchronized",
+      "authority": "canonical",
+      "authority_scope": "Repository knowledge roles, authority, ownership, update triggers, verification, and controlled relationships",
+      "owner": "maintainers",
+      "update_trigger": "A registered artifact or its maintenance contract changes",
+      "verification": "Release Harness registry validation",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["scripts/release_harness.py"],
+      "relations": [
+        {"type": "verified_by", "target": "release-harness"}
+      ]
+    }
+  ]
+}

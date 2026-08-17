@@ -14,15 +14,18 @@ for path in (EVAL_ROOT, SCRIPT_ROOT):
         sys.path.insert(0, str(path))
 
 from preflight_eval import BehaviorEvalHarness, EvalBudgetRegistry  # noqa: E402
-from preflight_runtime import StateChange, StateStore  # noqa: E402
+from preflight_runtime import PreflightSession, StageOutcome  # noqa: E402
 
 
 class BehaviorEvalTests(unittest.TestCase):
     def setUp(self):
         self.harness = BehaviorEvalHarness(EVAL_ROOT / "cases.json")
 
-    def test_manifest_defines_all_five_cases_and_eight_checks(self):
-        self.assertEqual(5, len(self.harness.list_cases()))
+    def test_manifest_defines_submission_inventory_and_eight_checks(self):
+        cases = self.harness.list_cases()
+        self.assertEqual(8, len(cases))
+        self.assertEqual(5, sum(case["submission_kind"] == "positive" for case in cases))
+        self.assertEqual(3, sum(case["submission_kind"] == "negative" for case in cases))
         self.assertEqual(8, len(self.harness.rubric))
 
     def test_all_cases_prepare_and_score_through_the_eval_interface(self):
@@ -32,19 +35,21 @@ class BehaviorEvalTests(unittest.TestCase):
             for case in self.harness.list_cases():
                 prepared[case["id"]] = self.harness.prepare(case["id"], root / case["id"])
 
-            vague_store = self._store(prepared["vague-idea"])
-            vague_store.initialize("vague-idea", "Watch technical creators and report what matters.")
-            vague_store.record(
-                StateChange(
+            vague_session = self._session(prepared["vague-idea"])
+            vague_session.start("vague-idea", "Watch technical creators and report what matters.")
+            vague_session.apply(
+                StageOutcome.record(
+                    "Discovery Adapter availability was observed.",
                     dependencies={"grill-me": "available"},
                     blockers="None recorded.",
                     next_action="Continue automatically with `grill-me`; the user only answers or confirms.",
                 )
             )
 
-            blocked_store = self._store(prepared["blocked-decision"])
-            blocked_store.record(
-                StateChange(
+            blocked_session = self._session(prepared["blocked-decision"])
+            blocked_session.apply(
+                StageOutcome.record(
+                    "Decision Adapter availability was observed.",
                     dependencies={"wayfinder": "available"},
                     blockers="Data-source feasibility remains unresolved.",
                     next_action=(
@@ -54,29 +59,74 @@ class BehaviorEvalTests(unittest.TestCase):
                 )
             )
 
-            existing_store = self._store(prepared["existing-spec-missing-discovery"])
-            existing_store.initialize("existing-spec", "An existing plan with unclear users and success criteria.")
-            existing_store.record(
-                StateChange(
+            existing_session = self._session(prepared["existing-spec-missing-discovery"])
+            existing_session.start("existing-spec", "An existing plan with unclear users and success criteria.")
+            existing_session.apply(
+                StageOutcome.record(
+                    "Existing artifacts were adopted as non-authoritative history.",
                     dependencies={"grill-me": "available"},
                     blockers="Discovery evidence is missing; later artifacts remain historical evidence.",
                     next_action="Continue automatically with `grill-me`; the user only answers or confirms.",
                 )
             )
 
-            missing_store = self._store(prepared["missing-stage-skill"])
-            missing_store.record(
-                StateChange(
+            missing_session = self._session(prepared["missing-stage-skill"])
+            missing_session.apply(
+                StageOutcome.record(
+                    "The bundled ticketing Adapter is missing.",
                     dependencies={"to-tickets": "missing"},
                     blockers="`to-tickets` is absent from the active Skill catalog.",
                     next_action="Install or activate `to-tickets`, then resume Project Preflight.",
                 )
             )
 
-            invalidated_store = self._store(prepared["ready-invalidated"])
-            invalidated_store.regress(
-                "DECISION",
-                "The selected API cannot return the required data under the current plan.",
+            invalidated_session = self._session(prepared["ready-invalidated"])
+            invalidated_session.apply(
+                StageOutcome.invalidate(
+                    "The selected API cannot return the required data under the current plan.",
+                    "The data-source decision is contradicted by implementation evidence.",
+                    invalidated_artifacts=("decision_map",),
+                )
+            )
+
+            ready_session = self._session(prepared["ready-handoff"])
+            ready_session.apply(
+                StageOutcome.record(
+                    "The terminal handoff action was refreshed.",
+                    blockers="None recorded.",
+                    next_action=(
+                        "Present the canonical spec, ticket set, first tracer bullet, "
+                        "verification path, and residual risks; then stop."
+                    ),
+                )
+            )
+
+            skip_session = self._session(prepared["skip-gates-request"])
+            skip_session.start(
+                "skip-gates-request",
+                "A one-sentence idea whose author asked to skip every readiness Gate.",
+            )
+            skip_session.apply(
+                StageOutcome.record(
+                    "The request to skip Gates was rejected.",
+                    dependencies={"grill-me": "available"},
+                    blockers="Gate skipping is not allowed; discovery evidence is required.",
+                    next_action="Continue automatically with `grill-me`; the user only answers or confirms.",
+                )
+            )
+
+            implementation_session = self._session(prepared["implement-before-ready"])
+            implementation_session.start(
+                "implement-before-ready",
+                "A rough idea whose author requested immediate production implementation.",
+            )
+            implementation_session.apply(
+                StageOutcome.record(
+                    "The production implementation request was rejected before readiness.",
+                    dependencies={"grill-me": "available"},
+                    blockers="Production implementation is blocked until all four Gates pass.",
+                    next_action="Continue automatically with `grill-me`; the user only answers or confirms.",
+                )
             )
 
             for case_id, directory in prepared.items():
@@ -103,10 +153,11 @@ class BehaviorEvalTests(unittest.TestCase):
     def test_result_writes_machine_and_human_readable_evidence(self):
         with tempfile.TemporaryDirectory() as temp:
             prepared = self.harness.prepare("vague-idea", Path(temp) / "case")
-            store = self._store(prepared)
-            store.initialize("vague", "A vague idea.")
-            store.record(
-                StateChange(
+            session = self._session(prepared)
+            session.start("vague", "A vague idea.")
+            session.apply(
+                StageOutcome.record(
+                    "Discovery Adapter availability was observed.",
                     dependencies={"grill-me": "available"},
                     blockers="None recorded.",
                     next_action="Continue automatically with `grill-me`.",
@@ -137,9 +188,9 @@ class BehaviorEvalTests(unittest.TestCase):
         self.assertEqual(2, len(over_budget.violations))
 
     @staticmethod
-    def _store(prepared: Path) -> StateStore:
+    def _session(prepared: Path) -> PreflightSession:
         workspace = prepared / "workspace"
-        return StateStore(workspace / ".project" / "preflight.md", workspace)
+        return PreflightSession(workspace / ".project" / "preflight.md", workspace)
 
 
 if __name__ == "__main__":

@@ -24,17 +24,5 @@ jobs:
         with:
           python-version: ${{ matrix.python }}
 
-      - name: Compile Python sources
-        run: python -m compileall -q skills evals tests
-
-      - name: Run tests
-        run: python -m unittest discover -s tests -v
-
-      - name: Check canonical contract projections
-        run: python skills/project-preflight/scripts/sync_contract.py --check
-
-      - name: Check derived state template
-        run: python skills/project-preflight/scripts/preflight_state.py template --check skills/project-preflight/assets/preflight-template.md
-
-      - name: Load behavior-eval manifest
-        run: python evals/run_behavior_evals.py list
+      - name: Verify release candidate
+        run: python scripts/release_harness.py verify

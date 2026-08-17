@@ -1,6 +1,6 @@
 # Behavior Evaluation Harness
 
-`cases.json` is the canonical manifest for the five behavior cases, their isolated fixtures, bundled-adapter assumptions, expected state, and eight-point rubric. `workflow-cases.md` explains the intent for human reviewers. Dated result files are evidence, not normative contracts.
+`cases.json` is the canonical manifest for eight behavior cases: five positive intended-use cases and three negative safety/boundary cases required by the public-submission preparation. It also owns isolated fixtures, bundled-adapter assumptions, expected state, and the eight-point rubric. `workflow-cases.md` explains the intent for human reviewers. Dated result files are evidence, not normative contracts.
 
 ## Reproduce a case
 
@@ -50,7 +50,7 @@ The command exits nonzero if either ceiling is exceeded. Accepting a regression 
 
 ## Evidence boundary
 
-The scorer deterministically checks Stage selection, dependency observations, Gate statuses, Artifact Evidence preservation, production-code guardrails, state validity, one changed Next Action, and the expected user-visible Skill directive. It does not prove that product decisions or prose are semantically good. A real behavior claim still requires a fresh-context evaluator; a deterministic test driver proves only that the eval module and fixtures work.
+The scorer deterministically checks Stage selection, dependency observations, Gate statuses, Artifact Evidence preservation, production-code guardrails, state validity, one changed Next Action, and the expected user-visible Skill directive. It does not prove that product decisions or prose are semantically good. A real behavior or submission claim still requires a fresh-context evaluator; a deterministic test driver proves only that the eval module and fixtures work.
 
 ## Recorded runs
 

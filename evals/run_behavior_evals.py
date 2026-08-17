@@ -57,7 +57,7 @@ def main(argv: list[str] | None = None) -> int:
         harness = BehaviorEvalHarness(args.manifest)
         if args.command == "list":
             for case in harness.list_cases():
-                print(f"{case['id']}\t{case['title']}")
+                print(f"{case['submission_kind']}\t{case['id']}\t{case['title']}")
             return 0
         if args.command == "prepare":
             print(harness.prepare(args.case_id, args.destination))

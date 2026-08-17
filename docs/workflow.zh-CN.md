@@ -51,7 +51,7 @@ Project Preflight · Decision — 正在使用 `wayfinder`（Project Preflight �
 
 ## 回退
 
-如果新证据推翻了旧假设，State lifecycle 会回到最早受影响的阶段。受影响 Gate 标记为 `invalidated`，后续产物继续保留但不再是当前权威。对应适配器会被自动提示并恢复。
+如果新证据推翻旧假设，Project Preflight 会在 Stage Outcome 中指出失效的领域 artifact，由 `PreflightSession` 推导最早受影响的阶段，调用方不直接选择。受影响 Gate 标记为 `invalidated`，后续产物继续保留但不再是当前权威；对应适配器会被自动提示并恢复。
 
 ## 终点
 

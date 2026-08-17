@@ -1,0 +1,61 @@
+name: Bug report
+description: Report reproducible incorrect behavior or a regression
+title: "[Bug]: "
+labels: ["bug", "needs-triage"]
+body:
+  - type: markdown
+    attributes:
+      value: Do not report vulnerabilities, credentials, or private project content here. Follow SECURITY.md instead.
+  - type: input
+    id: version
+    attributes:
+      label: Project Preflight version
+      description: Copy the version shown by `codex plugin list` or `.codex-plugin/plugin.json`.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Affected area
+      options:
+        - Orchestration or Stage routing
+        - State lifecycle or validation
+        - Artifact Evidence or remote checks
+        - Installation or upgrade
+        - Documentation
+        - Other
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Sanitized reproduction
+      description: Include the smallest prompt, starting Stage, and steps. Remove private content and tokens.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: observed
+    attributes:
+      label: Observed behavior
+    validations:
+      required: true
+  - type: input
+    id: environment
+    attributes:
+      label: Environment
+      description: Operating system, Python version, and Codex app or CLI version if known.
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Safety check
+      options:
+        - label: I removed credentials and private project content, and this is not a vulnerability report.
+          required: true

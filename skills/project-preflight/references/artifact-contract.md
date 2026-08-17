@@ -17,7 +17,7 @@ Use exactly one project-scoped state file:
 .project/preflight.md
 ```
 
-Create and mutate it through `scripts/preflight_state.py`. YAML frontmatter is canonical for finite state; the Markdown body is canonical for explanations, evidence summaries, blockers, and the next action. Do not maintain a parallel status file or hand-edit the frontmatter.
+Create and mutate it through the `PreflightSession` Interface exposed by `scripts/preflight_state.py`. YAML frontmatter is canonical for finite state; the Markdown body is canonical for explanations, evidence summaries, blockers, and the next action. Do not maintain a parallel status file or hand-edit the frontmatter.
 
 `scripts/preflight_runtime/_contract.py` is canonical for finite Stage, Gate, artifact, dependency, transition, and adapter mappings. `scripts/preflight_runtime/_orchestration.py` derives user-visible directives from that registry. `assets/preflight-template.md` is derived from the registry and must match `preflight_state.py template --check`.
 
@@ -126,12 +126,12 @@ The Original Idea section may be the canonical idea through `inline:#original-id
 
 ## Write and recovery rules
 
-1. Read and validate the current file through the State lifecycle interface.
+1. Read and validate the current file through `PreflightSession.current()`.
 2. Gather new evidence.
-3. Build one `record`, `advance`, or `regress` operation.
-4. Let the module compute and validate the complete candidate state.
+3. Build one semantic `StageOutcome` without a target Stage or Gate.
+4. Let `PreflightSession.apply()` derive the Gate, transition or regression, and complete candidate state.
 5. Let the module atomically replace the old state only after validation passes.
-6. If an operation fails, keep the last valid file unchanged. Use `recover --source <valid-state>` only with an explicitly chosen valid recovery source.
+6. If an operation fails, keep the last valid file unchanged. Use `recover --source <valid-state>` only with an explicitly chosen valid recovery source. The lower-level `record`, `advance`, and `regress` commands remain compatibility paths, not the primary Skill workflow.
 
 Never delete historical upstream artifacts during regression. Change their authority by invalidating the relevant gate and updating pointers only when a replacement becomes canonical.
 

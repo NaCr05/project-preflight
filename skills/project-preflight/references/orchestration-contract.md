@@ -4,10 +4,10 @@ Project Preflight is the only user-facing entry. Bundled stage Skills are adapte
 
 ## Directive interface
 
-Run:
+For an existing session, run:
 
 ```text
-python scripts/preflight_state.py directive --json --locale en
+python scripts/preflight_state.py current --json --locale en
 ```
 
 Use `--locale en` for English and `--locale zh-CN` for Simplified Chinese. Select the language from the user's current request; locale changes wording only and never changes routing facts.
@@ -47,4 +47,4 @@ Do not repeat the full banner before every question in an uninterrupted intervie
 
 ## Automatic return
 
-After an adapter saves or identifies its canonical artifact, it returns control to Project Preflight in the same task. Project Preflight evaluates the Gate, persists one transition, derives a fresh directive, shows the next banner, and continues. The user never copies a generated command.
+After an adapter saves or identifies its canonical artifact, it returns control to Project Preflight in the same task. Project Preflight evaluates the evidence and submits one `StageOutcome`. `PreflightSession` derives the Gate and transition, persists atomically, and returns a fresh directive in the same result. Project Preflight shows the next banner and continues. The user never copies a generated command.

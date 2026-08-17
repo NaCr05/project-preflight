@@ -11,8 +11,11 @@ Read `README.md` and `docs/product-spec.md` before changing behavior. For runtim
 - `skills/project-preflight/references/orchestration-contract.md` — automatic adapter routing and visible Skill announcements.
 - `skills/project-preflight/references/dependency-contract.md` — bundled adapter and tracker behavior.
 - `skills/project-preflight/scripts/preflight_runtime/_contract.py` — canonical finite Stage, Gate, artifact, dependency, transition, and adapter mappings.
+- `skills/project-preflight/scripts/preflight_runtime/_session.py` — primary outcome-oriented lifecycle Interface; derives Gate, transition/regression, persistence, and next directive.
 - `skills/project-preflight/scripts/preflight_runtime/_projections.py` — exact generated contract projections and repository drift checks.
 - `skills/project-preflight/scripts/preflight_runtime/_remote.py` — safe remote transport policy shared by Artifact Evidence adapters.
+- `docs/knowledge-map.json` — canonical roles, authority, ownership, update triggers, and verification routes for repository knowledge.
+- `scripts/release_harness.py` — the shared maintainer, CI, and tagged-release verification and packaging Interface.
 
 Decision records under `docs/decisions/` explain why the contracts exist. They do not override the current contracts.
 
@@ -23,7 +26,8 @@ Decision records under `docs/decisions/` explain why the contracts exist. They d
 - Show a Skill Visibility Banner at every Stage entry and resumed session.
 - Match the Banner locale to the user's language by passing `--locale en` or `--locale zh-CN` to `directive`.
 - Keep `SKILL.md` concise. Put detailed contracts one level down in `references/`.
-- Mutate `.project/preflight.md` only through the State lifecycle interface; do not hand-edit frontmatter.
+- Mutate `.project/preflight.md` through `PreflightSession` and `StageOutcome`; do not hand-edit frontmatter or select raw target Stages/Gates in new behavior.
+- Keep `StateStore` and its low-level CLI commands compatible in v0.3, but do not expand them as the primary orchestration Interface.
 - Do not claim that Python programmatically invokes Skills; it derives directives and Codex follows bundled Skill instructions.
 - Do not allow production implementation before all readiness gates pass.
 - Prefer artifact pointers over duplicated decision, spec, or ticket content.
@@ -36,14 +40,10 @@ Decision records under `docs/decisions/` explain why the contracts exist. They d
 Run from the repository root:
 
 ```text
-python skills/project-preflight/scripts/validate_preflight.py tests/fixtures/valid-idea.md --repo-root tests/fixtures
-python skills/project-preflight/scripts/preflight_state.py template --check skills/project-preflight/assets/preflight-template.md
-python skills/project-preflight/scripts/sync_contract.py --check
-python -m unittest discover -s tests -v
-python evals/run_behavior_evals.py list
+python scripts/release_harness.py verify
 python <path-to-plugin-creator>/scripts/validate_plugin.py .
 python <path-to-skill-creator>/scripts/quick_validate.py <each-directory-under-skills>
 git diff --check
 ```
 
-Before a release, verify the manifest version matches `CHANGELOG.md`, compare a full forward test with `evals/budgets.json`, and follow `CONTRIBUTING.md`. Also search for the obsolete name `to-prd`. It may appear only in an explicit migration or compatibility note; current workflow instructions must use `to-spec`.
+Before a release, compare a full forward test with `evals/budgets.json` and follow `CONTRIBUTING.md` plus `docs/plugin-submission.md`. The Release Harness checks manifest/version drift, the 5+3 submission inventory, knowledge-registry structure, exact projections, templates, tests, and package reproducibility contracts. Also search for the obsolete name `to-prd`. It may appear only in an explicit migration or compatibility note; current workflow instructions must use `to-spec`.

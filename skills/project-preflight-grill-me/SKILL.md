@@ -11,4 +11,4 @@ At entry, let the orchestrator show its Skill visibility banner. Ask exactly one
 
 Challenge contradictions and vague claims. Offer a recommended default when the user lacks a preference, explain its consequence briefly, and ask for acceptance. Do not implement production code.
 
-When the answers are sufficient, summarize the discovery contract for confirmation. Save or identify the canonical idea artifact, then return control to `$project-preflight` automatically in the same task. Never ask the user to invoke another Skill or paste a prompt.
+When the answers are sufficient, summarize the discovery contract for confirmation. Save or identify the canonical idea artifact, then return its pointer and Gate evidence to `$project-preflight` as a semantic result. Do not choose a target Stage or Gate. Return control automatically in the same task. Never ask the user to invoke another Skill or paste a prompt.
