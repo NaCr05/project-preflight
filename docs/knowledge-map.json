@@ -17,7 +17,8 @@
       "relations": [
         {"type": "source_of_truth", "target": "product-contract"},
         {"type": "source_of_truth", "target": "plugin-identity"},
-        {"type": "routes_to", "target": "runtime-contracts"}
+        {"type": "routes_to", "target": "runtime-contracts"},
+        {"type": "routes_to", "target": "maintenance-status"}
       ]
     },
     {
@@ -210,6 +211,24 @@
       "enforced_by": ["tests/test_release_harness.py", ".github/workflows/ci.yml"],
       "relations": [
         {"type": "routes_to", "target": "behavior-evals"}
+      ]
+    },
+    {
+      "artifact": "maintenance-status",
+      "path": "docs/maintenance.md",
+      "primary_role": "state_evidence",
+      "secondary_roles": ["rules_boundaries", "navigation_routing"],
+      "update_semantics": "stable_entry",
+      "authority": "canonical",
+      "authority_scope": "Supported release line, low-frequency maintenance posture, durable automation, and reactivation procedure",
+      "owner": "maintainers",
+      "update_trigger": "Supported version, maintenance posture, automation, or reactivation procedure changes",
+      "verification": "Repository contract tests and pull-request review",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": ["tests/test_repository_contract.py"],
+      "relations": [
+        {"type": "routes_to", "target": "agent-rules"},
+        {"type": "routes_to", "target": "release-harness"}
       ]
     },
     {

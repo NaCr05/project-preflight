@@ -11,6 +11,7 @@ All notable changes to Project Preflight are documented here. Versions follow Se
 - Reproducible Plugin archives with a two-build checksum regression test.
 - A public-submission preparation packet with five positive and three negative behavior cases.
 - Privacy, terms, support, issue, pull-request, and repository knowledge-governance artifacts.
+- A stable GitHub Release distribution path, immutable GitHub Actions references, monthly grouped Action updates, ownership metadata, and low-frequency maintenance guidance.
 
 ### Changed
 
@@ -20,7 +21,7 @@ All notable changes to Project Preflight are documented here. Versions follow Se
 
 ### Distribution status
 
-- The source repository is public. No GitHub tag or public Plugin Directory submission exists for this version yet.
+- The source repository is public and `v0.3.2` is the first tagged GitHub Release. Public Plugin Directory submission remains deferred.
 
 ## [0.3.1] - 2026-08-14
 

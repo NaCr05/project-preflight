@@ -1,6 +1,6 @@
 # Public Plugin Directory Submission Packet
 
-This is the maintained submission-preparation record for Project Preflight. The source repository is public; no tagged release exists, and the Plugin has not been submitted or accepted.
+This is the maintained submission-preparation record for Project Preflight. The source repository is public, and the tagged `v0.3.2` GitHub Release is public. The Plugin has not been submitted or accepted by the public Plugin Directory.
 
 ## Current status
 
@@ -14,7 +14,7 @@ This is the maintained submission-preparation record for Project Preflight. The 
 | Public website URLs | Ready | Anonymous HTTPS checks pass for the repository, support, privacy, and terms pages |
 | Private vulnerability reporting | Ready | Enabled on the public GitHub repository |
 | Developer or business verification | External action required | Complete in the OpenAI submission flow |
-| GitHub tagged release | Not authorized in this change | Create only after a separate release decision |
+| GitHub tagged release | Ready | `v0.3.2` with deterministic archive and SHA-256 record |
 | Public Plugin Directory submission | Not authorized in this change | Submit only after all external checks pass |
 
 ## Proposed listing
@@ -56,7 +56,7 @@ The machine-readable manifest is canonical. Positive cases demonstrate intended 
 3. Run the eight fresh-context behavior cases without exposing expected outcomes to the execution task; retain machine-readable and Markdown results.
 4. Compare any full real happy path with `evals/budgets.json` and investigate a budget breach.
 5. Confirm that GitHub private vulnerability reporting remains enabled and that `SECURITY.md` matches it.
-6. Create a reviewed tagged release only after explicit authorization; confirm the archive checksum and clean-session installation.
+6. Use the current tagged release, confirm its archive checksum, and repeat clean-session installation if submission occurs after runtime changes.
 7. Complete developer verification, listing metadata, and submission in the official OpenAI flow.
 
 Official references: [Build plugins](https://developers.openai.com/plugins/build/plugins), [Submit a plugin](https://developers.openai.com/plugins/deploy/submission), and [Plugin user guide](https://learn.chatgpt.com/docs/plugins).

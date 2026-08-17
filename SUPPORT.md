@@ -1,6 +1,6 @@
 # Support
 
-Project Preflight is maintained as an open-source Codex Plugin. Before requesting help, update to the latest version, start a new Codex task, and run:
+Project Preflight is maintained as an open-source Codex Plugin. `v0.3.2` is the stable supported release and the repository is in [low-frequency maintenance](docs/maintenance.md). Before requesting help, update to the latest version, start a new Codex task, and run:
 
 ```text
 codex plugin list

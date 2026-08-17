@@ -182,10 +182,14 @@ class RepositoryContractTests(unittest.TestCase):
     def test_public_readiness_routes_and_workflows_exist(self):
         for path in (
             "SUPPORT.md",
+            "CODE_OF_CONDUCT.md",
             "docs/privacy.md",
             "docs/terms.md",
+            "docs/maintenance.md",
             "docs/plugin-submission.md",
             "docs/knowledge-map.json",
+            ".github/CODEOWNERS",
+            ".github/dependabot.yml",
             ".github/ISSUE_TEMPLATE/bug.yml",
             ".github/ISSUE_TEMPLATE/feature.yml",
             ".github/pull_request_template.md",
@@ -204,6 +208,27 @@ class RepositoryContractTests(unittest.TestCase):
             self.assertIn("GitHub Release", text)
             self.assertIn("Plugin Directory", text)
             self.assertIn("scripts/release_harness.py verify", text)
+
+    def test_actions_are_pinned_and_release_status_is_current(self):
+        action_reference = re.compile(r"uses:\s+[^\s@]+@[0-9a-f]{40}(?:\s+#\s+v\d+)?$")
+        for path in (".github/workflows/ci.yml", ".github/workflows/release.yml"):
+            workflow = (REPO_ROOT / path).read_text(encoding="utf-8")
+            references = [line.strip() for line in workflow.splitlines() if "uses:" in line]
+            self.assertTrue(references, path)
+            self.assertTrue(all(action_reference.search(line) for line in references), references)
+            self.assertIn("persist-credentials: false", workflow)
+
+        english = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
+        chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
+        submission = (REPO_ROOT / "docs" / "plugin-submission.md").read_text(
+            encoding="utf-8"
+        )
+        for text in (english, chinese, submission):
+            self.assertIn("v0.3.2", text)
+        self.assertIn("releases/tag/v0.3.2", english)
+        self.assertIn("releases/tag/v0.3.2", chinese)
+        self.assertIn("low-frequency maintenance", english)
+        self.assertIn("低频维护", chinese)
 
     def test_readmes_document_synced_quick_start_and_lifecycle_commands(self):
         contracts = {

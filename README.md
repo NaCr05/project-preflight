@@ -12,16 +12,16 @@ Project Preflight is a single-entry Codex Plugin. You invoke `$project-preflight
 
 ## Project status
 
-Version 0.3.2 is available as public source. It is not yet a tagged GitHub Release or a public Plugin Directory listing.
+Version 0.3.2 is available as public source and a tagged GitHub Release. It is not listed in the public Plugin Directory.
 
 | Distribution surface | Current status |
 |---|---|
 | Source repository | Public; anyone can inspect, fork, and install from source |
-| GitHub Release | Not created; tagged release automation is prepared but has not been exercised |
+| GitHub Release | [`v0.3.2`](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2) with a deterministic archive and SHA-256 record |
 | Public Plugin Directory | Not submitted or listed |
 | Local end-to-end workflow | One complete real automatic-orchestration happy path recorded |
 
-Creating a tag and submitting to the Plugin Directory remain separate maintainer decisions. See the [submission packet](docs/plugin-submission.md).
+The repository is in [low-frequency maintenance](docs/maintenance.md). Public Plugin Directory submission remains a separate future milestone; see the [submission packet](docs/plugin-submission.md).
 
 ## Quick start from source
 
@@ -79,6 +79,10 @@ The bundled Stage Adapter saves durable evidence and returns control automatical
 **[Read the complete workflow →](docs/workflow.md)**
 
 ## Install
+
+### Install the stable GitHub Release
+
+Download `project-preflight-0.3.2.zip` and `project-preflight-0.3.2.sha256` from the [`v0.3.2` Release](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2). Verify the archive checksum, extract it to a stable directory, then register that directory with `$plugin-creator` and run `codex plugin add project-preflight@personal` as shown below. The Release archive contains only the installable Plugin and its runtime documentation.
 
 ### Public Plugin Directory
 
@@ -177,7 +181,7 @@ The four internal Skills are namespaced to avoid collisions with separately inst
 | Safe read-only GitHub Issue and generic URL checks | Deterministic tests; network access remains opt-in |
 | 5 positive + 3 negative submission cases | Manifest and deterministic scoring path prepared; fresh public-submission runs still required |
 | Release archive reproducibility | Two-build byte-identical checksum test |
-| GitHub tagged Release workflow | Defined but not yet exercised |
+| GitHub tagged Release workflow | Exercised for `v0.3.2`; archive and SHA-256 record published |
 | Public Plugin Directory listing | Not submitted |
 
 The recorded real high-reasoning happy path consumed approximately 108k model tokens and ten minutes. `evals/budgets.json` sets a 130k-token and 12-minute investigation threshold for comparable runs; it is a regression guardrail, not a cost promise.
@@ -198,14 +202,14 @@ python scripts/release_harness.py build --output dist
 
 Maintainers must also run the official Codex Plugin validator and Skill Creator validation for every changed Skill. The tagged Release workflow uses the same Release Harness; it alone does not authorize a release.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), [SECURITY.md](SECURITY.md), [privacy](docs/privacy.md), [terms](docs/terms.md), [CHANGELOG.md](CHANGELOG.md), and the [knowledge authority map](docs/knowledge-map.json).
+See [CONTRIBUTING.md](CONTRIBUTING.md), [SUPPORT.md](SUPPORT.md), [SECURITY.md](SECURITY.md), [maintenance status](docs/maintenance.md), [privacy](docs/privacy.md), [terms](docs/terms.md), [CHANGELOG.md](CHANGELOG.md), and the [knowledge authority map](docs/knowledge-map.json).
 
-## Roadmap
+## Deferred roadmap
 
 - Add a real execution Adapter to the Behavior Eval Module while keeping deterministic scripted fixtures.
 - Gather real usage evidence before deciding when the v0.3 low-level StateStore compatibility commands can be retired.
-- Run the eight submission cases and a clean-install happy path against an approved release candidate.
-- Publish stable support/privacy/terms URLs, enable private vulnerability reporting, and submit only after separate approval.
+- Run the eight fresh-context submission cases when an active Plugin Directory submission cycle begins.
+- Submit to the public Plugin Directory only during an active maintenance cycle and after separate approval.
 
 Remote tracker publishing and native programmatic Skill invocation remain deferred until real provider/runtime contracts justify those seams.
 

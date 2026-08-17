@@ -12,16 +12,16 @@ Project Preflight 是一个单入口 Codex Plugin。你只需调用 `$project-pr
 
 ## 项目现状
 
-0.3.2 已作为公开源码提供，但尚未创建带 tag 的 GitHub Release，也尚未上架公共 Plugin Directory。
+0.3.2 已作为公开源码和带 tag 的 GitHub Release 提供，但尚未上架公共 Plugin Directory。
 
 | 分发渠道 | 当前状态 |
 |---|---|
 | 源码仓库 | 已公开；任何人都可以查看、fork 并从源码安装 |
-| GitHub Release | 尚未创建；已准备带 tag 的自动发布流程，但尚未实际运行 |
+| GitHub Release | 已发布 [`v0.3.2`](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2)，包含可复现压缩包和 SHA-256 记录 |
 | 公共 Plugin Directory | 尚未提交、尚未上架 |
 | 本地端到端流程 | 已记录一次完整、真实、自动编排的 happy path |
 
-创建 tag 和提交 Plugin Directory 仍是两个独立的维护者决策。详见[提交准备包](docs/plugin-submission.md)。
+仓库现已进入[低频维护状态](docs/maintenance.md)。提交公共 Plugin Directory 仍是未来独立里程碑，详见[提交准备包](docs/plugin-submission.md)。
 
 ## 从源码快速开始
 
@@ -79,6 +79,10 @@ Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight �
 **[阅读完整流程 →](docs/workflow.zh-CN.md)**
 
 ## 安装
+
+### 安装稳定版 GitHub Release
+
+从 [`v0.3.2` Release](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2) 下载 `project-preflight-0.3.2.zip` 和 `project-preflight-0.3.2.sha256`。校验压缩包 checksum，解压到稳定目录，然后按照下文用 `$plugin-creator` 登记该目录，并运行 `codex plugin add project-preflight@personal`。Release 压缩包只包含可安装 Plugin 及其运行文档。
 
 ### 公共 Plugin Directory
 
@@ -177,7 +181,7 @@ $project-preflight
 | GitHub Issue 与通用 URL 的安全只读检查 | 确定性测试；联网仍需显式开启 |
 | 5 个正向 + 3 个负向提交案例 | 已准备清单和确定性评分路径；正式提交前仍需新上下文实跑 |
 | 发布压缩包可复现性 | 两次构建字节级 checksum 一致测试 |
-| GitHub 带 tag Release 工作流 | 已定义，尚未实际运行 |
+| GitHub 带 tag Release 工作流 | 已用于 `v0.3.2`；压缩包和 SHA-256 记录已发布 |
 | 公共 Plugin Directory | 尚未提交 |
 
 已记录的高推理真实 happy path 大约消耗 108k model tokens、10 分钟。`evals/budgets.json` 为同类运行设置 130k tokens 和 12 分钟的调查阈值；它是回归警戒线，不是费用承诺。
@@ -198,14 +202,14 @@ python scripts/release_harness.py build --output dist
 
 维护者还必须运行官方 Codex Plugin validator，并对每个有改动的 Skill 运行 Skill Creator 校验。带 tag 的 Release 工作流也使用同一个 Release Harness，但工作流存在不代表已经授权发布。
 
-继续阅读：[贡献指南](CONTRIBUTING.md)、[支持说明](SUPPORT.md)、[安全策略](SECURITY.md)、[隐私说明](docs/privacy.md)、[使用条款](docs/terms.md)、[变更记录](CHANGELOG.md)和[知识权威表](docs/knowledge-map.json)。
+继续阅读：[贡献指南](CONTRIBUTING.md)、[支持说明](SUPPORT.md)、[安全策略](SECURITY.md)、[维护状态](docs/maintenance.md)、[隐私说明](docs/privacy.md)、[使用条款](docs/terms.md)、[变更记录](CHANGELOG.md)和[知识权威表](docs/knowledge-map.json)。
 
-## 路线图
+## 暂缓路线图
 
 - 为 Behavior Eval Module 加入真实执行 Adapter，同时保留确定性 scripted fixtures。
 - 先收集真实使用证据，再决定何时移除 v0.3 的底层 StateStore 兼容命令。
-- 对批准的发布候选版实跑八个提交案例和一次干净安装 happy path。
-- 发布稳定的支持、隐私、条款 URL，启用私密漏洞报告，并在单独批准后提交上架。
+- 进入活跃的 Plugin Directory 提交周期时，再实跑八个新上下文提交案例。
+- 仅在恢复活跃维护且获得单独批准后，提交公共 Plugin Directory。
 
 远程 tracker 写入和 Python 原生调用 Skill 继续暂缓，直到真实的 provider/runtime contract 足以支撑这些 seam。
 
