@@ -12,20 +12,20 @@ Project Preflight 是一个单入口 Codex Plugin。你只需调用 `$project-pr
 
 ## 项目现状
 
-0.3.2 是面向公开发布准备的**源码候选版**，不是已经公开发布的声明。
+0.3.2 已作为公开源码提供，但尚未创建带 tag 的 GitHub Release，也尚未上架公共 Plugin Directory。
 
 | 分发渠道 | 当前状态 |
 |---|---|
-| 源码仓库 | Public-ready 改动审查期间仍为私有；有 GitHub 权限的用户可从源码安装 |
+| 源码仓库 | 已公开；任何人都可以查看、fork 并从源码安装 |
 | GitHub Release | 尚未创建；已准备带 tag 的自动发布流程，但尚未实际运行 |
 | 公共 Plugin Directory | 尚未提交、尚未上架 |
 | 本地端到端流程 | 已记录一次完整、真实、自动编排的 happy path |
 
-公开仓库、创建 tag、提交 Plugin Directory 是三个独立的维护者决策。详见[提交准备包](docs/plugin-submission.md)。
+创建 tag 和提交 Plugin Directory 仍是两个独立的维护者决策。详见[提交准备包](docs/plugin-submission.md)。
 
 ## 从源码快速开始
 
-正式上架公共目录前，拥有仓库权限的用户可以用四步完成源码安装和首次体验。
+正式上架公共目录前，任何人都可以用四步从这个源码仓库完成安装和首次体验。
 
 1. 在终端中，把 Plugin 克隆到一个稳定的本地路径：
 
@@ -86,7 +86,7 @@ Project Preflight 目前尚未上架。正式通过公开上架后，可以在 C
 
 ### 从 GitHub 源码安装
 
-前提：已安装 Git、Codex CLI 支持 `codex plugin`、仓库仍为私有时拥有访问权限，并且可以使用内置 `$plugin-creator` Skill。
+前提：已安装 Git、Codex CLI 支持 `codex plugin`，并且可以使用内置 `$plugin-creator` Skill。
 
 1. 把仓库克隆到一个稳定的本地路径：
 

@@ -1,6 +1,6 @@
 # Public Plugin Directory Submission Packet
 
-This is the maintained submission-preparation record for Project Preflight. It does not claim that the repository is public, that a tagged release exists, or that the Plugin has been submitted or accepted.
+This is the maintained submission-preparation record for Project Preflight. The source repository is public; no tagged release exists, and the Plugin has not been submitted or accepted.
 
 ## Current status
 
@@ -11,7 +11,8 @@ This is the maintained submission-preparation record for Project Preflight. It d
 | Reproducible release archive | Ready locally | `python scripts/release_harness.py build --output dist` |
 | 5 positive and 3 negative test cases | Prepared | `evals/cases.json` |
 | Privacy, terms, and support pages | Prepared in repository | `docs/privacy.md`, `docs/terms.md`, `SUPPORT.md` |
-| Public website URLs | Blocked until repository/site is public | Publish stable HTTPS pages before submission |
+| Public website URLs | Ready | Anonymous HTTPS checks pass for the repository, support, privacy, and terms pages |
+| Private vulnerability reporting | Ready | Enabled on the public GitHub repository |
 | Developer or business verification | External action required | Complete in the OpenAI submission flow |
 | GitHub tagged release | Not authorized in this change | Create only after a separate release decision |
 | Public Plugin Directory submission | Not authorized in this change | Submit only after all external checks pass |
@@ -23,9 +24,9 @@ This is the maintained submission-preparation record for Project Preflight. It d
 - **Short description:** Turn a rough software idea into an implementation-ready plan.
 - **Long description:** Invoke Project Preflight once. It visibly coordinates discovery, architecture decisions, specification, and ticketing while preserving durable evidence and preventing implementation before four readiness Gates pass.
 - **Developer:** NaCr05
-- **Support URL:** public HTTPS rendering of `SUPPORT.md`
-- **Privacy URL:** public HTTPS rendering of `docs/privacy.md`
-- **Terms URL:** public HTTPS rendering of `docs/terms.md`
+- **Support URL:** <https://github.com/NaCr05/project-preflight/blob/main/SUPPORT.md>
+- **Privacy URL:** <https://github.com/NaCr05/project-preflight/blob/main/docs/privacy.md>
+- **Terms URL:** <https://github.com/NaCr05/project-preflight/blob/main/docs/terms.md>
 
 ## Starter prompts
 
@@ -50,11 +51,11 @@ The machine-readable manifest is canonical. Positive cases demonstrate intended 
 
 ## Maintainer submission checklist
 
-1. Make the approved repository or documentation site public and verify every listing URL without authentication.
+1. Recheck the public repository and every listing URL without authentication before submission.
 2. Run `python scripts/release_harness.py verify` and both official Plugin and Skill validators.
 3. Run the eight fresh-context behavior cases without exposing expected outcomes to the execution task; retain machine-readable and Markdown results.
 4. Compare any full real happy path with `evals/budgets.json` and investigate a budget breach.
-5. Enable a private vulnerability reporting channel and update `SECURITY.md` if its availability changes.
+5. Confirm that GitHub private vulnerability reporting remains enabled and that `SECURITY.md` matches it.
 6. Create a reviewed tagged release only after explicit authorization; confirm the archive checksum and clean-session installation.
 7. Complete developer verification, listing metadata, and submission in the official OpenAI flow.
 

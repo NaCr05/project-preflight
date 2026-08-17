@@ -18,9 +18,9 @@ All notable changes to Project Preflight are documented here. Versions follow Se
 - CI and the tagged Release workflow now use the same maintainer verification Interface.
 - Product, release, and behavior-eval version facts are checked against the Plugin manifest.
 
-### Not released
+### Distribution status
 
-- This source version does not by itself create a GitHub tag, make the repository public, or submit the Plugin to the public directory.
+- The source repository is public. No GitHub tag or public Plugin Directory submission exists for this version yet.
 
 ## [0.3.1] - 2026-08-14
 

@@ -206,13 +206,20 @@ class RepositoryContractTests(unittest.TestCase):
             self.assertIn("scripts/release_harness.py verify", text)
 
     def test_readmes_document_synced_quick_start_and_lifecycle_commands(self):
-        headings = {
-            "README.md": "## Quick start from source",
-            "README.zh-CN.md": "## 从源码快速开始",
+        contracts = {
+            "README.md": (
+                "## Quick start from source",
+                "| Source repository | Public;",
+            ),
+            "README.zh-CN.md": (
+                "## 从源码快速开始",
+                "| 源码仓库 | 已公开；",
+            ),
         }
-        for path, heading in headings.items():
+        for path, (heading, public_status) in contracts.items():
             text = (REPO_ROOT / path).read_text(encoding="utf-8")
             self.assertIn(heading, text)
+            self.assertIn(public_status, text)
             self.assertIn("git clone https://github.com/NaCr05/project-preflight.git", text)
             self.assertIn("Use $plugin-creator to add the existing Plugin", text)
             self.assertIn("codex plugin add project-preflight@personal", text)
@@ -221,6 +228,17 @@ class RepositoryContractTests(unittest.TestCase):
             self.assertIn(".project/preflight.md", text)
             self.assertIn("codex plugin remove project-preflight@personal", text)
             self.assertIn("pull --ff-only", text)
+
+    def test_public_security_and_submission_routes_are_synchronized(self):
+        security = (REPO_ROOT / "SECURITY.md").read_text(encoding="utf-8")
+        submission = (REPO_ROOT / "docs" / "plugin-submission.md").read_text(
+            encoding="utf-8"
+        )
+        self.assertIn("private vulnerability reporting is enabled", security)
+        self.assertIn("The source repository is public", submission)
+        self.assertIn("https://github.com/NaCr05/project-preflight/blob/main/SUPPORT.md", submission)
+        self.assertIn("https://github.com/NaCr05/project-preflight/blob/main/docs/privacy.md", submission)
+        self.assertIn("https://github.com/NaCr05/project-preflight/blob/main/docs/terms.md", submission)
 
     def test_all_stage_adapters_are_bundled_and_implicitly_invokable(self):
         for adapter in STAGE_ADAPTERS.values():

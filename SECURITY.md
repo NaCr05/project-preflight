@@ -6,9 +6,9 @@ Security fixes target the latest source version on `main` and the latest tagged 
 
 ## Reporting a vulnerability
 
-Do not open a public issue with vulnerability details. Use GitHub's private vulnerability reporting when the repository exposes that option. If it is unavailable, open a minimal non-sensitive support issue asking the maintainer to establish a private reporting channel; include no vulnerability facts beyond the request for private contact.
+Do not open a public issue with vulnerability details. Use **Report a vulnerability** on the repository's Security page; GitHub private vulnerability reporting is enabled for this public repository.
 
-In the eventual private report, include the affected version, reproduction steps, impact, and any suggested mitigation. Do not include real credentials or private project artifacts. The current public-readiness review found that private vulnerability reporting was not yet available through the repository, so enabling and testing it remains a maintainer action before public submission.
+In the private report, include the affected version, reproduction steps, impact, and any suggested mitigation. Do not include real credentials or private project artifacts. If the GitHub reporting control is unexpectedly unavailable, open a minimal non-sensitive support issue asking the maintainer to restore the private channel; include no vulnerability facts.
 
 ## Security model
 

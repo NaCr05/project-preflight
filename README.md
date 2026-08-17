@@ -12,20 +12,20 @@ Project Preflight is a single-entry Codex Plugin. You invoke `$project-preflight
 
 ## Project status
 
-Version 0.3.2 is a public-ready **source candidate**, not a public release announcement.
+Version 0.3.2 is available as public source. It is not yet a tagged GitHub Release or a public Plugin Directory listing.
 
 | Distribution surface | Current status |
 |---|---|
-| Source repository | Private while public-ready changes are reviewed; authorized GitHub users can install from source |
+| Source repository | Public; anyone can inspect, fork, and install from source |
 | GitHub Release | Not created; tagged release automation is prepared but has not been exercised |
 | Public Plugin Directory | Not submitted or listed |
 | Local end-to-end workflow | One complete real automatic-orchestration happy path recorded |
 
-Making the repository public, creating a tag, and submitting to the Plugin Directory are separate maintainer decisions. See the [submission packet](docs/plugin-submission.md).
+Creating a tag and submitting to the Plugin Directory remain separate maintainer decisions. See the [submission packet](docs/plugin-submission.md).
 
 ## Quick start from source
 
-Until the public listing exists, authorized repository users can go from source to a first run in four steps.
+Until the public listing exists, anyone can go from this source repository to a first run in four steps.
 
 1. In a terminal, clone the Plugin to a stable local path:
 
@@ -86,7 +86,7 @@ Project Preflight is not listed there yet. After an accepted public listing exis
 
 ### Install from GitHub source
 
-Requirements: Git, a Codex CLI version with `codex plugin`, access to this repository while it is private, and the built-in `$plugin-creator` Skill.
+Requirements: Git, a Codex CLI version with `codex plugin`, and the built-in `$plugin-creator` Skill.
 
 1. Clone the repository to a stable local path:
 
