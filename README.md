@@ -10,18 +10,45 @@
 
 Project Preflight is a single-entry Codex Plugin. You invoke `$project-preflight`; it visibly coordinates discovery, architecture decisions, specification, and ticketing. You answer questions and confirm choices—you never copy a generated Skill command.
 
-## Project status
+## What happens
 
-Version 0.3.2 is available as public source and a tagged GitHub Release. It is not listed in the public Plugin Directory.
+```mermaid
+flowchart LR
+    A["Your rough paragraph"] --> P["$project-preflight once"]
+    P --> G["Discovery<br/>grill-me"]
+    G --> W["Decisions<br/>wayfinder"]
+    W --> S["Specification<br/>to-spec"]
+    S --> T["Tickets<br/>to-tickets"]
+    T --> R["READY_FOR_IMPLEMENTATION"]
+```
 
-| Distribution surface | Current status |
-|---|---|
-| Source repository | Public; anyone can inspect, fork, and install from source |
-| GitHub Release | [`v0.3.2`](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2) with a deterministic archive and SHA-256 record |
-| Public Plugin Directory | Not submitted or listed |
-| Local end-to-end workflow | One complete real automatic-orchestration happy path recorded |
+At each Stage, Project Preflight names the active capability:
 
-The repository is in [low-frequency maintenance](docs/maintenance.md). Public Plugin Directory submission remains a separate future milestone; see the [submission packet](docs/plugin-submission.md).
+```text
+Project Preflight · Discovery — Using `grill-me` (bundled Project Preflight adapter). Just answer or confirm.
+```
+
+The bundled Stage Adapter saves durable evidence and returns control automatically. Project Preflight checks the Gate, atomically updates `.project/preflight.md`, announces the next capability, and continues. It pauses only for your answer, a real blocker, cancellation, or readiness.
+
+**[Read the complete workflow →](docs/workflow.md)**
+
+## Real run: Feedback Compass
+
+A recorded validation used this rough opening:
+
+```text
+Use $project-preflight. 我想做一个帮独立开发者从用户反馈里找出最值得做功能的开源工具。
+```
+
+Project Preflight entered Discovery, named the active capability, asked exactly one focused question, and did not begin implementation. A separate installed-Plugin run then took the `feedback-compass` project through all four Stages in one invocation:
+
+```text
+Discovery → Decision → Specification → Ticketing → Ready
+```
+
+It created five durable planning artifacts under `.project/`. Independent validation returned `VALID: READY_FOR_IMPLEMENTATION`: every Gate passed, every artifact pointer resolved, and no production source or application scaffold was created. The first ticket, `FC-001`, was an end-to-end CSV tracer bullet with offline verification.
+
+**[Read the complete validation record →](evals/results-2026-08-14-automatic-orchestration.md)**
 
 ## Quick start from source
 
@@ -55,28 +82,6 @@ Use $project-preflight. I have a rough idea: an open-source assistant that turns
 You are set when the list shows `project-preflight@personal` as installed and enabled at version `0.3.2` or newer, and the new task displays the Project Preflight Discovery banner followed by one question. From there, only answer or confirm; the Plugin keeps its progress in the active project's `.project/preflight.md` and advances automatically.
 
 For prerequisites, troubleshooting, upgrades, and removal, continue to [Install](#install).
-
-## What happens
-
-```mermaid
-flowchart LR
-    A["Your rough paragraph"] --> P["$project-preflight once"]
-    P --> G["Discovery<br/>grill-me"]
-    G --> W["Decisions<br/>wayfinder"]
-    W --> S["Specification<br/>to-spec"]
-    S --> T["Tickets<br/>to-tickets"]
-    T --> R["READY_FOR_IMPLEMENTATION"]
-```
-
-At each Stage, Project Preflight names the active capability:
-
-```text
-Project Preflight · Discovery — Using `grill-me` (bundled Project Preflight adapter). Just answer or confirm.
-```
-
-The bundled Stage Adapter saves durable evidence and returns control automatically. Project Preflight checks the Gate, atomically updates `.project/preflight.md`, announces the next capability, and continues. It pauses only for your answer, a real blocker, cancellation, or readiness.
-
-**[Read the complete workflow →](docs/workflow.md)**
 
 ## Install
 
@@ -185,6 +190,19 @@ The four internal Skills are namespaced to avoid collisions with separately inst
 | Public Plugin Directory listing | Not submitted |
 
 The recorded real high-reasoning happy path consumed approximately 108k model tokens and ten minutes. `evals/budgets.json` sets a 130k-token and 12-minute investigation threshold for comparable runs; it is a regression guardrail, not a cost promise.
+
+## Project status
+
+Version 0.3.2 is available as public source and a tagged GitHub Release. It is not listed in the public Plugin Directory.
+
+| Distribution surface | Current status |
+|---|---|
+| Source repository | Public; anyone can inspect, fork, and install from source |
+| GitHub Release | [`v0.3.2`](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2) with a deterministic archive and SHA-256 record |
+| Public Plugin Directory | Not submitted or listed |
+| Local end-to-end workflow | One complete real automatic-orchestration happy path recorded |
+
+The repository is in [low-frequency maintenance](docs/maintenance.md). Public Plugin Directory submission remains a separate future milestone; see the [submission packet](docs/plugin-submission.md).
 
 ## Develop and release-check
 

@@ -2,6 +2,12 @@
 
 All notable changes to Project Preflight are documented here. Versions follow Semantic Versioning.
 
+## [Unreleased]
+
+### Changed
+
+- Reordered both public READMEs around the workflow and added a source-linked `feedback-compass` run showing the actual path to `READY_FOR_IMPLEMENTATION`.
+
 ## [0.3.2] - 2026-08-17
 
 ### Added

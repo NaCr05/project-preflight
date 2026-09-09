@@ -10,18 +10,45 @@
 
 Project Preflight 是一个单入口 Codex Plugin。你只需调用 `$project-preflight`；它会明确提示当前能力，并自动协调需求澄清、架构决策、规范生成和任务拆分。你只回答问题和确认选择，不需要复制任何 Skill 指令。
 
-## 项目现状
+## 实际流程
 
-0.3.2 已作为公开源码和带 tag 的 GitHub Release 提供，但尚未上架公共 Plugin Directory。
+```mermaid
+flowchart LR
+    A["你的一段模糊想法"] --> P["只调用一次<br/>$project-preflight"]
+    P --> G["需求澄清<br/>grill-me"]
+    G --> W["关键决策<br/>wayfinder"]
+    W --> S["项目规范<br/>to-spec"]
+    S --> T["执行任务<br/>to-tickets"]
+    T --> R["READY_FOR_IMPLEMENTATION"]
+```
 
-| 分发渠道 | 当前状态 |
-|---|---|
-| 源码仓库 | 已公开；任何人都可以查看、fork 并从源码安装 |
-| GitHub Release | 已发布 [`v0.3.2`](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2)，包含可复现压缩包和 SHA-256 记录 |
-| 公共 Plugin Directory | 尚未提交、尚未上架 |
-| 本地端到端流程 | 已记录一次完整、真实、自动编排的 happy path |
+进入每个阶段时，Project Preflight 都会提示当前能力：
 
-仓库现已进入[低频维护状态](docs/maintenance.md)。提交公共 Plugin Directory 仍是未来独立里程碑，详见[提交准备包](docs/plugin-submission.md)。
+```text
+Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight 内置适配器）。你只需回答或确认。
+```
+
+内置 Stage Adapter 保存持久化证据后，会自动把控制权交还给 Project Preflight。随后它检查 Gate、原子更新 `.project/preflight.md`、提示下一项能力并继续。流程只会因为等待你的回答、真实阻塞、主动取消或已经就绪而暂停。
+
+**[阅读完整流程 →](docs/workflow.zh-CN.md)**
+
+## 真实运行：Feedback Compass
+
+一次留档验证从这句模糊想法开始：
+
+```text
+Use $project-preflight. 我想做一个帮独立开发者从用户反馈里找出最值得做功能的开源工具。
+```
+
+Project Preflight 进入 Discovery，明确显示当前能力，只提出一个聚焦问题，且没有开始实现。另一轮已安装 Plugin 的完整运行则通过一次调用，把 `feedback-compass` 项目依次推进到四个阶段和最终就绪状态：
+
+```text
+Discovery → Decision → Specification → Ticketing → Ready
+```
+
+它在 `.project/` 下生成了五份持久化规划工件。独立验证返回 `VALID: READY_FOR_IMPLEMENTATION`：四道 Gate 全部通过，所有工件指针都能解析，且项目中没有生成生产源码或应用脚手架。首张任务单 `FC-001` 是一个带离线验证方式的端到端 CSV tracer bullet。
+
+**[阅读完整验证记录 →](evals/results-2026-08-14-automatic-orchestration.md)**
 
 ## 从源码快速开始
 
@@ -55,28 +82,6 @@ Use $project-preflight. 我有一个模糊想法：做一个开源助手，把�
 当列表显示 `project-preflight@personal` 已安装并启用、版本为 `0.3.2` 或更高，并且新任务先显示 Project Preflight 的 Discovery 阶段提示、再提出一个问题时，就说明已经成功运行。接下来只需回答或确认；Plugin 会把进度保存在当前项目的 `.project/preflight.md` 中，并自动推进。
 
 前提条件、故障排查、升级和卸载说明见[安装](#安装)。
-
-## 实际流程
-
-```mermaid
-flowchart LR
-    A["你的一段模糊想法"] --> P["只调用一次<br/>$project-preflight"]
-    P --> G["需求澄清<br/>grill-me"]
-    G --> W["关键决策<br/>wayfinder"]
-    W --> S["项目规范<br/>to-spec"]
-    S --> T["执行任务<br/>to-tickets"]
-    T --> R["READY_FOR_IMPLEMENTATION"]
-```
-
-进入每个阶段时，Project Preflight 都会提示当前能力：
-
-```text
-Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight 内置适配器）。你只需回答或确认。
-```
-
-内置 Stage Adapter 保存持久化证据后，会自动把控制权交还给 Project Preflight。随后它检查 Gate、原子更新 `.project/preflight.md`、提示下一项能力并继续。流程只会因为等待你的回答、真实阻塞、主动取消或已经就绪而暂停。
-
-**[阅读完整流程 →](docs/workflow.zh-CN.md)**
 
 ## 安装
 
@@ -185,6 +190,19 @@ $project-preflight
 | 公共 Plugin Directory | 尚未提交 |
 
 已记录的高推理真实 happy path 大约消耗 108k model tokens、10 分钟。`evals/budgets.json` 为同类运行设置 130k tokens 和 12 分钟的调查阈值；它是回归警戒线，不是费用承诺。
+
+## 项目现状
+
+0.3.2 已作为公开源码和带 tag 的 GitHub Release 提供，但尚未上架公共 Plugin Directory。
+
+| 分发渠道 | 当前状态 |
+|---|---|
+| 源码仓库 | 已公开；任何人都可以查看、fork 并从源码安装 |
+| GitHub Release | 已发布 [`v0.3.2`](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2)，包含可复现压缩包和 SHA-256 记录 |
+| 公共 Plugin Directory | 尚未提交、尚未上架 |
+| 本地端到端流程 | 已记录一次完整、真实、自动编排的 happy path |
+
+仓库现已进入[低频维护状态](docs/maintenance.md)。提交公共 Plugin Directory 仍是未来独立里程碑，详见[提交准备包](docs/plugin-submission.md)。
 
 ## 开发与发布检查
 
