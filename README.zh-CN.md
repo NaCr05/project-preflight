@@ -1,6 +1,6 @@
 # Project Preflight
 
-[![English](docs/diagrams/assets/language-en.svg)](README.md) | **简体中文**
+[English](README.md) | **简体中文**
 
 [![CI](https://github.com/NaCr05/project-preflight/actions/workflows/ci.yml/badge.svg)](https://github.com/NaCr05/project-preflight/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
