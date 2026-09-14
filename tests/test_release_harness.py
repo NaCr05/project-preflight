@@ -59,7 +59,6 @@ class ReleaseHarnessTests(unittest.TestCase):
         for required in (
             "SUPPORT.md",
             "docs/diagrams/assets/overview.en.dark.png",
-            "docs/diagrams/assets/language-zh-CN.svg",
         ):
             with self.subTest(required=required), tempfile.TemporaryDirectory() as temp:
                 copied = self._copy_repository(Path(temp))

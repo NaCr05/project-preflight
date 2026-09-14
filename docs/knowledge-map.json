@@ -305,36 +305,6 @@
       ]
     },
     {
-      "artifact": "readme-language-buttons",
-      "path": "docs/diagrams/assets/language-*.svg",
-      "primary_role": "navigation_routing",
-      "secondary_roles": [],
-      "update_semantics": "stable_entry",
-      "authority": "explanatory",
-      "authority_scope": "Local language-switch buttons for the English and Simplified Chinese README",
-      "owner": "documentation maintainers",
-      "update_trigger": "README language, workflow, Gate, artifact, or regression explanations change",
-      "verification": "Reciprocal README links, rendered review, and release image membership",
-      "enforcement_level": "review_required",
-      "enforced_by": [
-        "docs/diagrams/README.md"
-      ],
-      "relations": [
-        {
-          "type": "source_of_truth",
-          "target": "repository-entry"
-        },
-        {
-          "type": "routes_to",
-          "target": "repository-entry"
-        },
-        {
-          "type": "routes_to",
-          "target": "repository-entry-zh-cn"
-        }
-      ]
-    },
-    {
       "artifact": "readme-diagram-maintenance",
       "path": "docs/diagrams/README.md",
       "primary_role": "navigation_routing",
