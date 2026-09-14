@@ -1,6 +1,6 @@
 # Project Preflight
 
-**English** | [简体中文](README.zh-CN.md)
+**English** | [![简体中文](docs/diagrams/assets/language-zh-CN.svg)](README.zh-CN.md)
 
 [![CI](https://github.com/NaCr05/project-preflight/actions/workflows/ci.yml/badge.svg)](https://github.com/NaCr05/project-preflight/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -8,19 +8,27 @@
 
 > Invoke one Skill once. Turn a rough software idea into an evidence-backed, implementation-ready plan.
 
-Project Preflight is a single-entry Codex Plugin. You invoke `$project-preflight`; it visibly coordinates discovery, architecture decisions, specification, and ticketing. You answer questions and confirm choices—you never copy a generated Skill command.
+Project Preflight is a project-planning Plugin for Codex. Invoke `$project-preflight` to clarify the problem, settle key decisions, write a specification, and break the work into executable tickets. You answer questions and confirm choices; progress and evidence pointers are saved in `.project/preflight.md`.
+
+A completed run gives you a specification, tickets, the first executable slice, and a verification path so you can move into development.
 
 ## What happens
 
-```mermaid
-flowchart LR
-    A["Your rough paragraph"] --> P["$project-preflight once"]
-    P --> G["Discovery<br/>grill-me"]
-    G --> W["Decisions<br/>wayfinder"]
-    W --> S["Specification<br/>to-spec"]
-    S --> T["Tickets<br/>to-tickets"]
-    T --> R["READY_FOR_IMPLEMENTATION"]
-```
+Your rough idea moves through four Gates. Each Stage advances the plan and leaves evidence that later work can refer to.
+
+<a href="docs/diagrams/assets/overview.en.png">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/assets/overview.en.dark.png">
+  <img src="docs/diagrams/assets/overview.en.png" alt="A rough idea moves through Discovery, Decisions, Specification, and Tickets to Ready. Each Gate must pass, and the Stages produce discovery notes, a decision record, a specification, and tickets.">
+</picture>
+</a>
+
+**Discovery → Decisions → Specification → Tickets → Ready.** Each Gate must pass before the next Stage begins; missing answers or evidence keep the current Stage active. Artifacts can use different carriers, and small projects may justify not needing a separate decision map.
+
+`READY_FOR_IMPLEMENTATION` means the plan is ready for implementation. A subsequent implementation request starts development.
+
+<details>
+<summary>How progress is announced</summary>
 
 At each Stage, Project Preflight names the active capability:
 
@@ -28,19 +36,23 @@ At each Stage, Project Preflight names the active capability:
 Project Preflight · Discovery — Using `grill-me` (bundled Project Preflight adapter). Just answer or confirm.
 ```
 
-The bundled Stage Adapter saves durable evidence and returns control automatically. Project Preflight checks the Gate, atomically updates `.project/preflight.md`, announces the next capability, and continues. It pauses only for your answer, a real blocker, cancellation, or readiness.
+Codex follows the orchestration directive to use the bundled Stage Skill. After receiving a Stage Outcome, the state module derives the Gate and next Stage, validates the result, and saves it. You do not need to invoke the four internal Skills yourself.
+
+</details>
 
 **[Read the complete workflow →](docs/workflow.md)**
 
 ## Real run: Feedback Compass
 
-A recorded validation used this rough opening:
+This example comes from the **2026-08-14 validation record**; the full run used Plugin **v0.3.0**. The current published version is v0.3.2.
+
+A recorded validation used this original Chinese prompt, asking for an open-source tool to help independent developers prioritize features from user feedback:
 
 ```text
 Use $project-preflight. 我想做一个帮独立开发者从用户反馈里找出最值得做功能的开源工具。
 ```
 
-Project Preflight entered Discovery, named the active capability, asked exactly one focused question, and did not begin implementation. A separate installed-Plugin run then took the `feedback-compass` project through all four Stages in one invocation:
+Project Preflight entered Discovery, named the active capability, asked exactly one focused question, and did not begin implementation. A separate installed-Plugin run then took the `feedback-compass` project through all four Stages in one invocation, with recommended defaults approved in advance:
 
 ```text
 Discovery → Decision → Specification → Ticketing → Ready
@@ -87,7 +99,7 @@ For prerequisites, troubleshooting, upgrades, and removal, continue to [Install]
 
 ### Install the stable GitHub Release
 
-Download `project-preflight-0.3.2.zip` and `project-preflight-0.3.2.sha256` from the [`v0.3.2` Release](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2). Verify the archive checksum, extract it to a stable directory, then register that directory with `$plugin-creator` and run `codex plugin add project-preflight@personal` as shown below. The Release archive contains only the installable Plugin and its runtime documentation.
+Download `project-preflight-0.3.2.zip` and `project-preflight-0.3.2.sha256` from the [`v0.3.2` Release](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2). Verify the archive checksum, extract it to a stable directory, then register that directory with `$plugin-creator` and run `codex plugin add project-preflight@personal` as described in steps 2–3 of [Quick start from source](#quick-start-from-source). The Release archive contains only the installable Plugin and its runtime documentation.
 
 ### Public Plugin Directory
 
@@ -95,28 +107,10 @@ Project Preflight is not listed there yet. After an accepted public listing exis
 
 ### Install from GitHub source
 
-Requirements: Git, a Codex CLI version with `codex plugin`, and the built-in `$plugin-creator` Skill.
+Requirements: Git, a Codex CLI version with `codex plugin`, and the built-in `$plugin-creator` Skill. Follow [Quick start from source](#quick-start-from-source) for installation and your first invocation.
 
-1. Clone the repository to a stable local path:
-
-```text
-git clone https://github.com/NaCr05/project-preflight.git <plugin-source-path>/project-preflight
-```
-
-2. In a Codex task, register that existing checkout with your personal marketplace:
-
-```text
-Use $plugin-creator to add the existing Plugin at <absolute-path>/project-preflight to my personal marketplace. Do not scaffold or overwrite the Plugin.
-```
-
-3. Install and verify it:
-
-```text
-codex plugin add project-preflight@personal
-codex plugin list
-```
-
-The list should show `project-preflight@personal` as installed and enabled with version `0.3.2` or newer. Start a new task so Codex loads the newly installed Skills.
+<details>
+<summary>Upgrade or uninstall</summary>
 
 ### Upgrade a source installation
 
@@ -135,6 +129,8 @@ codex plugin remove project-preflight@personal
 ```
 
 Uninstalling does not delete the source checkout or planning files already written to projects.
+
+</details>
 
 ## Use
 
@@ -159,7 +155,28 @@ The first message can be one immature sentence. Project Preflight does not expec
 3. **Specification readiness** — scope, behavior, boundaries, and verification are buildable and unambiguous.
 4. **Execution readiness** — tickets are vertical, testable, correctly blocked, and begin with a tracer bullet.
 
-Only Gate 4 produces `READY_FOR_IMPLEMENTATION`. The endpoint names the canonical spec, approved ticket set, first unblocked tracer bullet, verification path, and residual risks. Project Preflight does not write production application code.
+Passing all four Gates produces `READY_FOR_IMPLEMENTATION`. The endpoint names the canonical spec, approved ticket set, first unblocked tracer bullet, verification path, and residual risks. Project Preflight does not write production application code.
+
+## When evidence changes
+
+Suppose the plan is Ready, then a key decision loses its supporting evidence. Project Preflight returns to **Decision**: unaffected G1 stays passed, G2–G4 become invalidated, and the decisions, specification, and tickets are reassessed.
+
+<a href="docs/diagrams/assets/recovery.en.png">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/assets/recovery.en.dark.png">
+  <img src="docs/diagrams/assets/recovery.en.png" alt="When decision evidence is invalidated after Ready, return to Decisions. Keep G1 passed and reassess G2, G3, and G4 before reaching Ready again.">
+</picture>
+</a>
+
+Previous artifacts remain visible, but affected evidence must be reassessed before it can support the plan again. Other kinds of invalidated evidence return the workflow to their earliest affected Stage.
+
+When answers are missing, a blocker appears, or you pause, progress stays in `.project/preflight.md`. Continue through the same entry:
+
+```text
+Use $project-preflight to audit this project and continue from the earliest unsupported Gate.
+```
+
+**[Read the Stage and Gate rules →](skills/project-preflight/references/workflow.md)**
 
 ## Architecture
 

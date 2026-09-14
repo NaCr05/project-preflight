@@ -1,0 +1,171 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "决策依据变化后，从决策阶段继续",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "phases",
+      "label": "证据通过，才能再次前进"
+    }
+  ],
+  "mainPath": [
+    "DISCOVERY",
+    "DECISION",
+    "SPECIFICATION",
+    "TICKETING",
+    "READY_FOR_IMPLEMENTATION"
+  ],
+  "semanticChecks": {
+    "allowedRoots": [
+      "DISCOVERY"
+    ],
+    "requiredEdges": [
+      {
+        "from": "DISCOVERY",
+        "to": "DECISION"
+      },
+      {
+        "from": "DECISION",
+        "to": "SPECIFICATION"
+      },
+      {
+        "from": "SPECIFICATION",
+        "to": "TICKETING"
+      },
+      {
+        "from": "TICKETING",
+        "to": "READY_FOR_IMPLEMENTATION"
+      },
+      {
+        "from": "READY_FOR_IMPLEMENTATION",
+        "to": "DECISION"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "DISCOVERY",
+      "lane": "phases",
+      "col": 0,
+      "type": "frontend",
+      "label": "需求澄清",
+      "sublabel": "本例中 G1 保留",
+      "width": 156,
+      "height": 90
+    },
+    {
+      "id": "DECISION",
+      "lane": "phases",
+      "col": 1,
+      "type": "backend",
+      "label": "关键决策",
+      "sublabel": "G2 重新评估",
+      "width": 156,
+      "height": 90
+    },
+    {
+      "id": "SPECIFICATION",
+      "lane": "phases",
+      "col": 2,
+      "type": "backend",
+      "label": "项目规范",
+      "sublabel": "G3 重新评估",
+      "width": 156,
+      "height": 90
+    },
+    {
+      "id": "TICKETING",
+      "lane": "phases",
+      "col": 3,
+      "type": "backend",
+      "label": "执行任务",
+      "sublabel": "G4 重新评估",
+      "width": 156,
+      "height": 90
+    },
+    {
+      "id": "READY_FOR_IMPLEMENTATION",
+      "lane": "phases",
+      "col": 4,
+      "type": "frontend",
+      "label": "实施就绪",
+      "sublabel": "四道关卡全部通过",
+      "width": 156,
+      "height": 90
+    }
+  ],
+  "edges": [
+    {
+      "id": "gate_1_passed",
+      "from": "DISCOVERY",
+      "to": "DECISION",
+      "label": "G1 通过",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "gate_2_passed",
+      "from": "DECISION",
+      "to": "SPECIFICATION",
+      "label": "G2 通过",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "gate_3_passed",
+      "from": "SPECIFICATION",
+      "to": "TICKETING",
+      "label": "G3 通过",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "gate_4_passed",
+      "from": "TICKETING",
+      "to": "READY_FOR_IMPLEMENTATION",
+      "label": "G4 通过",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "decision_invalidated",
+      "from": "READY_FOR_IMPLEMENTATION",
+      "to": "DECISION",
+      "label": "决策证据失效",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "本图只演示一种回退",
+      "items": [
+        "当前已实施就绪，随后发现关键决策依据不再成立。",
+        "系统回到 DECISION；未受影响的 G1 保留，G2 至 G4 失效。"
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "旧产物保留，重新检查",
+      "items": [
+        "原有决策记录、规范和任务仍可查看，重新评估后才能作为有效依据。",
+        "失效发生在哪类证据，就回到最早受影响的阶段。"
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "状态保存，支持继续",
+      "items": [
+        ".project/preflight.md 记录当前阶段、关卡和产物指针。",
+        "缺少答案或证据时停留在当前阶段；再次调用单入口继续。"
+      ]
+    }
+  ]
+}

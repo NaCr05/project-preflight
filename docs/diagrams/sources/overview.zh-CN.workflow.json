@@ -1,0 +1,54 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "从一段想法到可实施计划",
+    "locale": "zh-CN",
+    "quality_profile": "showcase",
+    "legend": {"mode": "hidden"}
+  },
+  "lanes": [
+    {"id": "journey", "label": "一次调用，按证据推进"},
+    {"id": "artifacts", "label": "每个阶段留下可追溯的规划产物"}
+  ],
+  "mainPath": ["IDEA", "DISCOVERY", "DECISION", "SPECIFICATION", "TICKETING", "READY_FOR_IMPLEMENTATION"],
+  "semanticChecks": {
+    "allowedRoots": ["IDEA"],
+    "allowedTerminals": ["idea_evidence", "decision_map", "spec", "tickets", "READY_FOR_IMPLEMENTATION"],
+    "requiredEdges": [
+      {"from":"IDEA","to":"DISCOVERY"},
+      {"from":"DISCOVERY","to":"DECISION"},
+      {"from":"DECISION","to":"SPECIFICATION"},
+      {"from":"SPECIFICATION","to":"TICKETING"},
+      {"from":"TICKETING","to":"READY_FOR_IMPLEMENTATION"}
+    ]
+  },
+  "nodes": [
+    {"id":"IDEA","lane":"journey","col":0,"type":"frontend","label":"一段想法","sublabel":"单入口调用","tag":"你发起一次","width":128,"height":86},
+    {"id":"DISCOVERY","lane":"journey","col":1,"type":"backend","label":"需求澄清","sublabel":"grill-me","tag":"G1 · 问题清楚","width":156,"height":86},
+    {"id":"DECISION","lane":"journey","col":2,"type":"backend","label":"关键决策","sublabel":"wayfinder","tag":"G2 · 决策就绪","width":156,"height":86},
+    {"id":"SPECIFICATION","lane":"journey","col":3,"type":"backend","label":"项目规范","sublabel":"to-spec","tag":"G3 · 规范就绪","width":156,"height":86},
+    {"id":"TICKETING","lane":"journey","col":4,"type":"backend","label":"执行任务","sublabel":"to-tickets","tag":"G4 · 执行就绪","width":156,"height":86},
+    {"id":"READY_FOR_IMPLEMENTATION","lane":"journey","col":5,"type":"frontend","label":"实施就绪","sublabel":"Ready","tag":"交接实施计划","width":156,"height":86},
+    {"id":"idea_evidence","lane":"artifacts","col":1,"type":"database","label":"需求证据","sublabel":"用户 / 范围 / 目标","width":156,"height":72},
+    {"id":"decision_map","lane":"artifacts","col":2,"type":"database","label":"决策记录","sublabel":"选择 / 依据 / 约束","width":156,"height":72},
+    {"id":"spec","lane":"artifacts","col":3,"type":"database","label":"项目规范","sublabel":"行为 / 边界 / 验证","width":156,"height":72},
+    {"id":"tickets","lane":"artifacts","col":4,"type":"database","label":"任务集合","sublabel":"切片 / 依赖 / 验收","width":156,"height":72}
+  ],
+  "edges": [
+    {"id":"idea-discovery","from":"IDEA","to":"DISCOVERY","label":"开始","role":"main"},
+    {"id":"discovery-decision","from":"DISCOVERY","to":"DECISION","label":"G1 通过","role":"main","variant":"emphasis"},
+    {"id":"decision-specification","from":"DECISION","to":"SPECIFICATION","label":"G2 通过","role":"main","variant":"emphasis"},
+    {"id":"specification-ticketing","from":"SPECIFICATION","to":"TICKETING","label":"G3 通过","role":"main","variant":"emphasis"},
+    {"id":"ticketing-ready","from":"TICKETING","to":"READY_FOR_IMPLEMENTATION","label":"G4 通过","role":"main","variant":"emphasis"},
+    {"id":"discovery-evidence","from":"DISCOVERY","to":"idea_evidence","label":"形成","variant":"dashed"},
+    {"id":"decision-evidence","from":"DECISION","to":"decision_map","label":"形成","variant":"dashed"},
+    {"id":"specification-evidence","from":"SPECIFICATION","to":"spec","label":"形成","variant":"dashed"},
+    {"id":"ticketing-evidence","from":"TICKETING","to":"tickets","label":"形成","variant":"dashed"}
+  ],
+  "cards": [
+    {"dot":"cyan","title":"你负责关键判断","items":["调用 $project-preflight，按需回答问题和确认选择。","Codex 使用内置阶段 Skill；证据不足时留在当前阶段。"]},
+    {"dot":"violet","title":"状态支持继续工作","items":[".project/preflight.md 保存阶段、关卡、证据与产物指针。","产物可以采用不同载体；小项目可按契约说明无需独立决策图。"]},
+    {"dot":"emerald","title":"终点是实施交接","items":["交付规范、任务、首个可执行切片、验证路径与剩余风险。","Ready 表示规划就绪；产品实现由后续请求启动。"]}
+  ]
+}

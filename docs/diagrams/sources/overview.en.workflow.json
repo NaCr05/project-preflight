@@ -1,0 +1,267 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "From a rough idea to an implementation plan",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "journey",
+      "label": "One invocation, evidence at every Gate"
+    },
+    {
+      "id": "artifacts",
+      "label": "Planning artifacts"
+    }
+  ],
+  "mainPath": [
+    "IDEA",
+    "DISCOVERY",
+    "DECISION",
+    "SPECIFICATION",
+    "TICKETING",
+    "READY_FOR_IMPLEMENTATION"
+  ],
+  "semanticChecks": {
+    "allowedRoots": [
+      "IDEA"
+    ],
+    "allowedTerminals": [
+      "idea_evidence",
+      "decision_map",
+      "spec",
+      "tickets",
+      "READY_FOR_IMPLEMENTATION"
+    ],
+    "requiredEdges": [
+      {
+        "from": "IDEA",
+        "to": "DISCOVERY"
+      },
+      {
+        "from": "DISCOVERY",
+        "to": "DECISION"
+      },
+      {
+        "from": "DECISION",
+        "to": "SPECIFICATION"
+      },
+      {
+        "from": "SPECIFICATION",
+        "to": "TICKETING"
+      },
+      {
+        "from": "TICKETING",
+        "to": "READY_FOR_IMPLEMENTATION"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "IDEA",
+      "lane": "journey",
+      "col": 0,
+      "type": "frontend",
+      "label": "Rough idea",
+      "sublabel": "Single entry",
+      "tag": "One invocation",
+      "width": 104,
+      "height": 86
+    },
+    {
+      "id": "DISCOVERY",
+      "lane": "journey",
+      "col": 1,
+      "type": "backend",
+      "label": "Discovery",
+      "sublabel": "grill-me",
+      "tag": "G1 · Problem clarity",
+      "width": 140,
+      "height": 86
+    },
+    {
+      "id": "DECISION",
+      "lane": "journey",
+      "col": 2,
+      "type": "backend",
+      "label": "Decisions",
+      "sublabel": "wayfinder",
+      "tag": "G2 · Decisions ready",
+      "width": 140,
+      "height": 86
+    },
+    {
+      "id": "SPECIFICATION",
+      "lane": "journey",
+      "col": 3,
+      "type": "backend",
+      "label": "Specification",
+      "sublabel": "to-spec",
+      "tag": "G3 · Spec ready",
+      "width": 140,
+      "height": 86
+    },
+    {
+      "id": "TICKETING",
+      "lane": "journey",
+      "col": 4,
+      "type": "backend",
+      "label": "Tickets",
+      "sublabel": "to-tickets",
+      "tag": "G4 · Execution ready",
+      "width": 140,
+      "height": 86
+    },
+    {
+      "id": "READY_FOR_IMPLEMENTATION",
+      "lane": "journey",
+      "col": 5,
+      "type": "frontend",
+      "label": "Ready",
+      "sublabel": "Implementation plan",
+      "tag": "Handoff to development",
+      "width": 140,
+      "height": 86
+    },
+    {
+      "id": "idea_evidence",
+      "lane": "artifacts",
+      "col": 1,
+      "type": "database",
+      "label": "Discovery notes",
+      "sublabel": "User / scope / goal",
+      "width": 140,
+      "height": 72
+    },
+    {
+      "id": "decision_map",
+      "lane": "artifacts",
+      "col": 2,
+      "type": "database",
+      "label": "Decision record",
+      "sublabel": "Choices / evidence / limits",
+      "width": 140,
+      "height": 72
+    },
+    {
+      "id": "spec",
+      "lane": "artifacts",
+      "col": 3,
+      "type": "database",
+      "label": "Specification",
+      "sublabel": "Behavior / bounds / checks",
+      "width": 140,
+      "height": 72
+    },
+    {
+      "id": "tickets",
+      "lane": "artifacts",
+      "col": 4,
+      "type": "database",
+      "label": "Ticket set",
+      "sublabel": "Slices / deps / checks",
+      "width": 140,
+      "height": 72
+    }
+  ],
+  "edges": [
+    {
+      "id": "idea-discovery",
+      "from": "IDEA",
+      "to": "DISCOVERY",
+      "label": "Start",
+      "role": "main"
+    },
+    {
+      "id": "discovery-decision",
+      "from": "DISCOVERY",
+      "to": "DECISION",
+      "label": "G1 passed",
+      "role": "main",
+      "variant": "emphasis"
+    },
+    {
+      "id": "decision-specification",
+      "from": "DECISION",
+      "to": "SPECIFICATION",
+      "label": "G2 passed",
+      "role": "main",
+      "variant": "emphasis"
+    },
+    {
+      "id": "specification-ticketing",
+      "from": "SPECIFICATION",
+      "to": "TICKETING",
+      "label": "G3 passed",
+      "role": "main",
+      "variant": "emphasis"
+    },
+    {
+      "id": "ticketing-ready",
+      "from": "TICKETING",
+      "to": "READY_FOR_IMPLEMENTATION",
+      "label": "G4 passed",
+      "role": "main",
+      "variant": "emphasis"
+    },
+    {
+      "id": "discovery-evidence",
+      "from": "DISCOVERY",
+      "to": "idea_evidence",
+      "label": "Produce",
+      "variant": "dashed"
+    },
+    {
+      "id": "decision-evidence",
+      "from": "DECISION",
+      "to": "decision_map",
+      "label": "Produce",
+      "variant": "dashed"
+    },
+    {
+      "id": "specification-evidence",
+      "from": "SPECIFICATION",
+      "to": "spec",
+      "label": "Produce",
+      "variant": "dashed"
+    },
+    {
+      "id": "ticketing-evidence",
+      "from": "TICKETING",
+      "to": "tickets",
+      "label": "Produce",
+      "variant": "dashed"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "You make the key decisions",
+      "items": [
+        "Invoke $project-preflight, then answer questions and confirm choices.",
+        "Codex uses the bundled Stage Skills. Missing evidence keeps the current Stage active."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Durable state supports resumption",
+      "items": [
+        ".project/preflight.md stores the Stage, Gates, evidence, and artifact pointers.",
+        "Artifacts can use different carriers; small projects may justify not needing a separate decision map."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "The endpoint is an implementation handoff",
+      "items": [
+        "Receive the spec, tickets, first executable slice, verification path, and residual risks.",
+        "Ready means planning is complete. A subsequent implementation request starts development."
+      ]
+    }
+  ]
+}

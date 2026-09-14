@@ -21,6 +21,8 @@ if str(SCRIPT.parent) not in sys.path:
     sys.path.insert(0, str(SCRIPT.parent))
 
 from preflight_runtime._contract import (  # noqa: E402
+    ARTIFACT_STAGES,
+    FORWARD_TRANSITIONS,
     STAGE_ADAPTERS,
 )
 from preflight_runtime._projections import ContractProjection  # noqa: E402
@@ -30,10 +32,69 @@ class RepositoryContractTests(unittest.TestCase):
     def test_readme_language_switches_are_reciprocal(self):
         english = (REPO_ROOT / "README.md").read_text(encoding="utf-8")
         chinese = (REPO_ROOT / "README.zh-CN.md").read_text(encoding="utf-8")
-        self.assertIn("[简体中文](README.zh-CN.md)", english)
-        self.assertIn("[English](README.md)", chinese)
+        self.assertRegex(english, r"\]\(README\.zh-CN\.md\)")
+        self.assertRegex(chinese, r"\]\(README\.md\)")
         self.assertIn("(docs/workflow.md)", english)
         self.assertIn("(docs/workflow.zh-CN.md)", chinese)
+
+    def test_readme_diagrams_preserve_bilingual_topology_and_runtime_facts(self):
+        sources = REPO_ROOT / "docs" / "diagrams" / "sources"
+        stage_path = [FORWARD_TRANSITIONS[0][0], *(end for _, end in FORWARD_TRANSITIONS)]
+        for story in ("overview", "recovery"):
+            diagrams = []
+            for locale in ("en", "zh-CN"):
+                diagram = json.loads(
+                    (sources / f"{story}.{locale}.workflow.json").read_text(encoding="utf-8")
+                )
+                self.assertEqual(locale, diagram["meta"]["locale"])
+                self.assertEqual(
+                    stage_path if story == "overview" else stage_path[1:],
+                    diagram["mainPath"],
+                )
+                edges = {(edge["from"], edge["to"]) for edge in diagram["edges"]}
+                self.assertTrue(set(zip(diagram["mainPath"], diagram["mainPath"][1:])) <= edges)
+                if story == "overview":
+                    artifact_nodes = {
+                        "idea": "idea_evidence",
+                        "decision_map": "decision_map",
+                        "spec": "spec",
+                        "tickets": "tickets",
+                    }
+                    for artifact, stage in ARTIFACT_STAGES.items():
+                        self.assertIn((stage, artifact_nodes[artifact]), edges)
+                else:
+                    regression = {
+                        (edge["from"], edge["to"])
+                        for edge in diagram["edges"]
+                        if edge.get("variant") == "security"
+                    }
+                    self.assertEqual(
+                        {("READY_FOR_IMPLEMENTATION", ARTIFACT_STAGES["decision_map"])},
+                        regression,
+                    )
+                diagrams.append(diagram)
+            english, chinese = diagrams
+
+            def nodes(diagram):
+                return {
+                    (node["id"], node["lane"], node["col"], node["type"])
+                    for node in diagram["nodes"]
+                }
+
+            self.assertEqual(nodes(english), nodes(chinese))
+
+            def relationships(diagram):
+                return {
+                    (
+                        edge["id"], edge["from"], edge["to"],
+                        edge.get("variant", "default"), edge.get("role"),
+                    )
+                    for edge in diagram["edges"]
+                }
+
+            self.assertEqual(
+                relationships(english), relationships(chinese),
+            )
 
     def test_workflow_guides_are_reciprocal_and_have_mermaid_maps(self):
         english = (REPO_ROOT / "docs" / "workflow.md").read_text(encoding="utf-8")

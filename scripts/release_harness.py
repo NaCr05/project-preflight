@@ -31,6 +31,16 @@ PACKAGE_FILES = (
     "THIRD_PARTY_NOTICES.md",
     "docs/privacy.md",
     "docs/terms.md",
+    "docs/diagrams/assets/language-en.svg",
+    "docs/diagrams/assets/language-zh-CN.svg",
+    "docs/diagrams/assets/overview.en.png",
+    "docs/diagrams/assets/overview.en.dark.png",
+    "docs/diagrams/assets/overview.zh-CN.png",
+    "docs/diagrams/assets/overview.zh-CN.dark.png",
+    "docs/diagrams/assets/recovery.en.png",
+    "docs/diagrams/assets/recovery.en.dark.png",
+    "docs/diagrams/assets/recovery.zh-CN.png",
+    "docs/diagrams/assets/recovery.zh-CN.dark.png",
 )
 PACKAGE_DIRECTORIES = ("skills",)
 

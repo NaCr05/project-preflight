@@ -247,6 +247,122 @@
       "relations": [
         {"type": "verified_by", "target": "release-harness"}
       ]
+    },
+    {
+      "artifact": "readme-diagram-sources",
+      "path": "docs/diagrams/sources",
+      "primary_role": "navigation_routing",
+      "secondary_roles": [],
+      "update_semantics": "synchronized",
+      "authority": "explanatory",
+      "authority_scope": "Bilingual explanatory workflow topology and diagram copy",
+      "owner": "documentation maintainers",
+      "update_trigger": "README language, workflow, Gate, artifact, or regression explanations change",
+      "verification": "Repository tests compare Stage paths, regression, and bilingual topology",
+      "enforcement_level": "automated_blocking",
+      "enforced_by": [
+        "tests/test_repository_contract.py"
+      ],
+      "relations": [
+        {
+          "type": "source_of_truth",
+          "target": "runtime-contract-registry"
+        },
+        {
+          "type": "source_of_truth",
+          "target": "preflight-session"
+        }
+      ]
+    },
+    {
+      "artifact": "readme-diagram-images",
+      "path": "docs/diagrams/assets/*.png",
+      "primary_role": "navigation_routing",
+      "secondary_roles": [],
+      "update_semantics": "derived_generated",
+      "authority": "explanatory",
+      "authority_scope": "Light and dark static figures embedded in both READMEs",
+      "owner": "documentation maintainers",
+      "update_trigger": "README language, workflow, Gate, artifact, or regression explanations change",
+      "verification": "Archify delivery receipts, visual review, and Release Harness package tests",
+      "enforcement_level": "review_required",
+      "enforced_by": [
+        "docs/diagrams/README.md"
+      ],
+      "relations": [
+        {
+          "type": "generated_from",
+          "target": "readme-diagram-sources"
+        },
+        {
+          "type": "source_of_truth",
+          "target": "readme-diagram-sources"
+        },
+        {
+          "type": "verified_by",
+          "target": "release-harness"
+        }
+      ]
+    },
+    {
+      "artifact": "readme-language-buttons",
+      "path": "docs/diagrams/assets/language-*.svg",
+      "primary_role": "navigation_routing",
+      "secondary_roles": [],
+      "update_semantics": "stable_entry",
+      "authority": "explanatory",
+      "authority_scope": "Local language-switch buttons for the English and Simplified Chinese README",
+      "owner": "documentation maintainers",
+      "update_trigger": "README language, workflow, Gate, artifact, or regression explanations change",
+      "verification": "Reciprocal README links, rendered review, and release image membership",
+      "enforcement_level": "review_required",
+      "enforced_by": [
+        "docs/diagrams/README.md"
+      ],
+      "relations": [
+        {
+          "type": "source_of_truth",
+          "target": "repository-entry"
+        },
+        {
+          "type": "routes_to",
+          "target": "repository-entry"
+        },
+        {
+          "type": "routes_to",
+          "target": "repository-entry-zh-cn"
+        }
+      ]
+    },
+    {
+      "artifact": "readme-diagram-maintenance",
+      "path": "docs/diagrams/README.md",
+      "primary_role": "navigation_routing",
+      "secondary_roles": [],
+      "update_semantics": "stable_entry",
+      "authority": "explanatory",
+      "authority_scope": "Diagram regeneration, evidence authority, and README asset packaging instructions",
+      "owner": "documentation maintainers",
+      "update_trigger": "README language, workflow, Gate, artifact, or regression explanations change",
+      "verification": "Documentation review when diagram sources or assets change",
+      "enforcement_level": "review_required",
+      "enforced_by": [
+        "docs/diagrams/README.md"
+      ],
+      "relations": [
+        {
+          "type": "source_of_truth",
+          "target": "agent-rules"
+        },
+        {
+          "type": "routes_to",
+          "target": "readme-diagram-sources"
+        },
+        {
+          "type": "routes_to",
+          "target": "release-harness"
+        }
+      ]
     }
   ]
 }

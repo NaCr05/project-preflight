@@ -1,0 +1,171 @@
+{
+  "schema_version": 2,
+  "diagram_type": "workflow",
+  "meta": {
+    "title": "When decision evidence changes, resume at Decision",
+    "locale": "en",
+    "quality_profile": "showcase",
+    "legend": {
+      "mode": "hidden"
+    }
+  },
+  "lanes": [
+    {
+      "id": "phases",
+      "label": "Reassess affected Gates before advancing"
+    }
+  ],
+  "mainPath": [
+    "DISCOVERY",
+    "DECISION",
+    "SPECIFICATION",
+    "TICKETING",
+    "READY_FOR_IMPLEMENTATION"
+  ],
+  "semanticChecks": {
+    "allowedRoots": [
+      "DISCOVERY"
+    ],
+    "requiredEdges": [
+      {
+        "from": "DISCOVERY",
+        "to": "DECISION"
+      },
+      {
+        "from": "DECISION",
+        "to": "SPECIFICATION"
+      },
+      {
+        "from": "SPECIFICATION",
+        "to": "TICKETING"
+      },
+      {
+        "from": "TICKETING",
+        "to": "READY_FOR_IMPLEMENTATION"
+      },
+      {
+        "from": "READY_FOR_IMPLEMENTATION",
+        "to": "DECISION"
+      }
+    ]
+  },
+  "nodes": [
+    {
+      "id": "DISCOVERY",
+      "lane": "phases",
+      "col": 0,
+      "type": "frontend",
+      "label": "Discovery",
+      "sublabel": "G1 stays passed here",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "id": "DECISION",
+      "lane": "phases",
+      "col": 1,
+      "type": "backend",
+      "label": "Decisions",
+      "sublabel": "Reassess G2",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "id": "SPECIFICATION",
+      "lane": "phases",
+      "col": 2,
+      "type": "backend",
+      "label": "Specification",
+      "sublabel": "Reassess G3",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "id": "TICKETING",
+      "lane": "phases",
+      "col": 3,
+      "type": "backend",
+      "label": "Tickets",
+      "sublabel": "Reassess G4",
+      "width": 140,
+      "height": 90
+    },
+    {
+      "id": "READY_FOR_IMPLEMENTATION",
+      "lane": "phases",
+      "col": 4,
+      "type": "frontend",
+      "label": "Ready",
+      "sublabel": "All four Gates passed",
+      "width": 140,
+      "height": 90
+    }
+  ],
+  "edges": [
+    {
+      "id": "gate_1_passed",
+      "from": "DISCOVERY",
+      "to": "DECISION",
+      "label": "G1 passed",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "gate_2_passed",
+      "from": "DECISION",
+      "to": "SPECIFICATION",
+      "label": "G2 passed",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "gate_3_passed",
+      "from": "SPECIFICATION",
+      "to": "TICKETING",
+      "label": "G3 passed",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "gate_4_passed",
+      "from": "TICKETING",
+      "to": "READY_FOR_IMPLEMENTATION",
+      "label": "G4 passed",
+      "variant": "emphasis",
+      "role": "main"
+    },
+    {
+      "id": "decision_invalidated",
+      "from": "READY_FOR_IMPLEMENTATION",
+      "to": "DECISION",
+      "label": "Decision evidence invalidated",
+      "variant": "security"
+    }
+  ],
+  "cards": [
+    {
+      "dot": "cyan",
+      "title": "One specific regression example",
+      "items": [
+        "The plan was Ready, then a key decision lost its supporting evidence.",
+        "Return to DECISION: unaffected G1 stays passed; G2 through G4 become invalidated."
+      ]
+    },
+    {
+      "dot": "violet",
+      "title": "Keep the artifacts and reassess them",
+      "items": [
+        "Old decisions, specifications, and tickets remain visible, but affected evidence needs reassessment.",
+        "The type of invalidated evidence determines the earliest affected Stage."
+      ]
+    },
+    {
+      "dot": "emerald",
+      "title": "Resume from saved state",
+      "items": [
+        ".project/preflight.md records the current Stage, Gates, and artifact pointers.",
+        "Missing answers or evidence keep the current Stage active. Resume through the same entry."
+      ]
+    }
+  ]
+}
