@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import shutil
 import tempfile
 import unittest
@@ -43,13 +44,28 @@ class ReleaseHarnessTests(unittest.TestCase):
             with zipfile.ZipFile(archive_a) as left, zipfile.ZipFile(archive_b) as right:
                 self.assertEqual(left.namelist(), right.namelist())
                 self.assertNotIn("scripts/release_harness.py", left.namelist())
+                self.assertFalse(
+                    any(name.startswith("docs/diagrams/sources/") for name in left.namelist())
+                )
+                for readme in ("README.md", "README.zh-CN.md"):
+                    text = left.read(readme).decode("utf-8")
+                    assets = set(re.findall(r'docs/diagrams/assets/[^)"\s]+', text))
+                    self.assertTrue(assets, f"{readme} must expose its diagram assets")
+                    for asset in assets:
+                        self.assertIn(asset, left.namelist(), f"{readme}: {asset}")
+                        self.assertEqual((REPO_ROOT / asset).read_bytes(), left.read(asset))
 
     def test_missing_required_release_file_blocks_build(self):
-        with tempfile.TemporaryDirectory() as temp:
-            copied = self._copy_repository(Path(temp))
-            (copied / "SUPPORT.md").unlink()
-            with self.assertRaises(ReleaseHarnessError):
-                ReleaseHarness(copied).build(Path(temp) / "dist")
+        for required in (
+            "SUPPORT.md",
+            "docs/diagrams/assets/overview.en.dark.png",
+            "docs/diagrams/assets/language-zh-CN.svg",
+        ):
+            with self.subTest(required=required), tempfile.TemporaryDirectory() as temp:
+                copied = self._copy_repository(Path(temp))
+                (copied / required).unlink()
+                with self.assertRaises(ReleaseHarnessError):
+                    ReleaseHarness(copied).build(Path(temp) / "dist")
 
     @staticmethod
     def _copy_repository(destination: Path) -> Path:

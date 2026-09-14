@@ -1,6 +1,6 @@
 # Project Preflight
 
-[English](README.md) | **简体中文**
+[![English](docs/diagrams/assets/language-en.svg)](README.md) | **简体中文**
 
 [![CI](https://github.com/NaCr05/project-preflight/actions/workflows/ci.yml/badge.svg)](https://github.com/NaCr05/project-preflight/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
@@ -8,19 +8,27 @@
 
 > 只调用一次，把一段模糊的软件想法推进成有证据、可实施的计划。
 
-Project Preflight 是一个单入口 Codex Plugin。你只需调用 `$project-preflight`；它会明确提示当前能力，并自动协调需求澄清、架构决策、规范生成和任务拆分。你只回答问题和确认选择，不需要复制任何 Skill 指令。
+Project Preflight 是一个用于 Codex 的项目启动规划 Plugin。调用 `$project-preflight`，它会引导你澄清问题、确认关键决策、形成项目规范并拆成可执行任务。你负责回答问题和确认选择，进度与证据指针保存在 `.project/preflight.md`。
+
+完成后，你会拿到规范、任务、首个可执行切片和验证路径，可以接着进入开发。
 
 ## 实际流程
 
-```mermaid
-flowchart LR
-    A["你的一段模糊想法"] --> P["只调用一次<br/>$project-preflight"]
-    P --> G["需求澄清<br/>grill-me"]
-    G --> W["关键决策<br/>wayfinder"]
-    W --> S["项目规范<br/>to-spec"]
-    S --> T["执行任务<br/>to-tickets"]
-    T --> R["READY_FOR_IMPLEMENTATION"]
-```
+你的一段想法会依次经过四道关卡。每个阶段既推进计划，也留下后续工作可以引用的依据。
+
+<a href="docs/diagrams/assets/overview.zh-CN.png">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/assets/overview.zh-CN.dark.png">
+  <img src="docs/diagrams/assets/overview.zh-CN.png" alt="从想法进入需求澄清、关键决策、项目规范、执行任务；每道关卡通过才进入下一阶段，并留下需求证据、决策记录、规范和任务。">
+</picture>
+</a>
+
+**需求澄清 → 关键决策 → 项目规范 → 执行任务 → 实施就绪。** 每道关卡通过后才继续；缺少回答或证据时，停留在当前阶段。产物可采用不同载体，小项目可按契约说明无需独立决策图。
+
+`READY_FOR_IMPLEMENTATION` 表示规划就绪，交付的是实施计划；后续开发由新的实施请求启动。
+
+<details>
+<summary>运行时如何提示进度</summary>
 
 进入每个阶段时，Project Preflight 都会提示当前能力：
 
@@ -28,11 +36,15 @@ flowchart LR
 Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight 内置适配器）。你只需回答或确认。
 ```
 
-内置 Stage Adapter 保存持久化证据后，会自动把控制权交还给 Project Preflight。随后它检查 Gate、原子更新 `.project/preflight.md`、提示下一项能力并继续。流程只会因为等待你的回答、真实阻塞、主动取消或已经就绪而暂停。
+Codex 按编排指令使用内置阶段 Skill。阶段结果提交给状态模块后，由模块推导关卡和后续阶段、校验并保存状态；你不需要手动调用四个内部 Skill。
+
+</details>
 
 **[阅读完整流程 →](docs/workflow.zh-CN.md)**
 
 ## 真实运行：Feedback Compass
+
+以下案例来自 **2026-08-14 的留档验证**；其中完整流程使用 Plugin **v0.3.0**。当前仓库发布版为 v0.3.2。
 
 一次留档验证从这句模糊想法开始：
 
@@ -40,7 +52,7 @@ Project Preflight · Discovery — 正在使用 `grill-me`（Project Preflight �
 Use $project-preflight. 我想做一个帮独立开发者从用户反馈里找出最值得做功能的开源工具。
 ```
 
-Project Preflight 进入 Discovery，明确显示当前能力，只提出一个聚焦问题，且没有开始实现。另一轮已安装 Plugin 的完整运行则通过一次调用，把 `feedback-compass` 项目依次推进到四个阶段和最终就绪状态：
+Project Preflight 进入 Discovery，明确显示当前能力，只提出一个聚焦问题，且没有开始实现。另一轮已安装 Plugin 的完整运行，在预先批准推荐默认项后，通过一次调用，把 `feedback-compass` 项目依次推进到四个阶段和最终就绪状态：
 
 ```text
 Discovery → Decision → Specification → Ticketing → Ready
@@ -87,7 +99,7 @@ Use $project-preflight. 我有一个模糊想法：做一个开源助手，把�
 
 ### 安装稳定版 GitHub Release
 
-从 [`v0.3.2` Release](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2) 下载 `project-preflight-0.3.2.zip` 和 `project-preflight-0.3.2.sha256`。校验压缩包 checksum，解压到稳定目录，然后按照下文用 `$plugin-creator` 登记该目录，并运行 `codex plugin add project-preflight@personal`。Release 压缩包只包含可安装 Plugin 及其运行文档。
+从 [`v0.3.2` Release](https://github.com/NaCr05/project-preflight/releases/tag/v0.3.2) 下载 `project-preflight-0.3.2.zip` 和 `project-preflight-0.3.2.sha256`。校验压缩包 checksum，解压到稳定目录，然后按[从源码快速开始](#从源码快速开始)的第 2–3 步，用 `$plugin-creator` 登记该目录，并运行 `codex plugin add project-preflight@personal`。Release 压缩包只包含可安装 Plugin 及其运行文档。
 
 ### 公共 Plugin Directory
 
@@ -95,28 +107,10 @@ Project Preflight 目前尚未上架。正式通过公开上架后，可以在 C
 
 ### 从 GitHub 源码安装
 
-前提：已安装 Git、Codex CLI 支持 `codex plugin`，并且可以使用内置 `$plugin-creator` Skill。
+前提：已安装 Git、Codex CLI 支持 `codex plugin`，并且可以使用内置 `$plugin-creator` Skill。安装与首次调用步骤见[从源码快速开始](#从源码快速开始)。
 
-1. 把仓库克隆到一个稳定的本地路径：
-
-```text
-git clone https://github.com/NaCr05/project-preflight.git <plugin-source-path>/project-preflight
-```
-
-2. 在 Codex 任务中，把已有目录登记到个人 Marketplace：
-
-```text
-Use $plugin-creator to add the existing Plugin at <绝对路径>/project-preflight to my personal marketplace. Do not scaffold or overwrite the Plugin.
-```
-
-3. 安装并验证：
-
-```text
-codex plugin add project-preflight@personal
-codex plugin list
-```
-
-列表中应显示 `project-preflight@personal` 已安装并启用，版本为 `0.3.2` 或更高。随后新建任务，让 Codex 加载新安装的 Skills。
+<details>
+<summary>升级与卸载</summary>
 
 ### 升级源码安装
 
@@ -135,6 +129,8 @@ codex plugin remove project-preflight@personal
 ```
 
 卸载不会删除源码目录，也不会删除已经写入项目的规划文件。
+
+</details>
 
 ## 使用
 
@@ -159,7 +155,28 @@ Use $project-preflight 检查这个项目，并从最早缺少证据的 Gate 继
 3. **规范就绪** — 范围、行为、边界和验证方式足够明确，可以实施。
 4. **执行就绪** — Ticket 纵向、可测试、依赖清晰，并从最薄的 tracer bullet 开始。
 
-只有 Gate 4 通过后才会进入 `READY_FOR_IMPLEMENTATION`。终点会列出规范、已批准 Ticket、首个未阻塞 tracer bullet、验证路径和剩余风险。Project Preflight 不会编写生产应用代码。
+四道 Gate 全部通过后才会进入 `READY_FOR_IMPLEMENTATION`。终点会列出规范、已批准 Ticket、首个未阻塞 tracer bullet、验证路径和剩余风险。Project Preflight 不会编写生产应用代码。
+
+## 证据变化时如何继续
+
+例如，计划已经实施就绪，随后发现关键决策依据不再成立。Project Preflight 会回到 **Decision**：本例保留未受影响的 G1，将 G2–G4 标为失效，重新检查决策、规范和任务。
+
+<a href="docs/diagrams/assets/recovery.zh-CN.png">
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/diagrams/assets/recovery.zh-CN.dark.png">
+  <img src="docs/diagrams/assets/recovery.zh-CN.png" alt="实施就绪后，如果决策证据失效，就回到关键决策阶段；保留 G1，重新评估 G2、G3、G4，通过后再次实施就绪。">
+</picture>
+</a>
+
+原有产物仍可查看，受影响的依据需要重新评估后才能继续使用。失效来自其他类型的证据时，会回到相应的最早受影响阶段。
+
+缺少回答、遇到阻塞或主动暂停时，进度保存在 `.project/preflight.md`；继续工作时仍使用同一个入口：
+
+```text
+Use $project-preflight 检查这个项目，并从最早缺少证据的 Gate 继续。
+```
+
+**[查看阶段与关卡规则 →](skills/project-preflight/references/workflow.md)**
 
 ## 架构
 
